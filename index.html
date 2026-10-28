@@ -93,14 +93,14 @@ section.bloque h2 .serif{color:var(--texto);font-size:.62em;font-style:italic;di
 section.bloque .sub{margin:6px 0 16px;color:var(--texto-suave);font-size:14px}
 .tabla-wrap{overflow-x:auto;border-radius:16px;border:2px solid var(--linea)}
 table{width:100%;border-collapse:collapse;min-width:680px}
-th{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:11px 10px;color:#fff8ec;background:var(--tinta)}
-section.rifa th{background:var(--fucsia);color:#1c1a20}
+th{font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:11px 10px;color:#1c1a20;background:var(--fucsia)}
 td{padding:6px;border-top:1px solid var(--borde)}
 tr:nth-child(even) td{background:var(--rosa-suave)}
 td input,td select{width:100%;font-family:"Poppins",sans-serif;font-size:15px;font-weight:500;color:var(--texto);
   border:2px solid transparent;background:var(--input);border-radius:10px;padding:7px 9px}
 td input:focus,td select:focus{outline:none;border-color:var(--fucsia);background:var(--papel)}
 td.del{width:42px;text-align:center}
+td .calc{display:block;padding:7px 9px;font-weight:700}
 td.del button{border:none;background:none;font-size:18px;padding:4px 8px;color:var(--texto-suave)}
 td.del button:hover{color:var(--rojo);background:var(--rosa-claro)}
 tfoot td{font-weight:800;background:var(--amarillo)!important;color:#1c1a20;padding:11px 10px}
@@ -160,7 +160,6 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
   <span class="estrella" style="left:48%;top:52%;animation-delay:.9s;font-size:14px">★</span>
   <div class="in">
     <div class="txt">
-      <p class="chico">las finanzas de</p>
       <h1>La Reina<span class="crema">de la Queja</span></h1>
       <div class="cinta">Finanzas 2026</div>
       <div class="botones-hero">
@@ -207,7 +206,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 
 <section class="bloque remeras" id="remeras">
   <div class="titulo-sec"><h2><span class="serif">las</span>Remes de la reina</h2></div>
-  <p class="sub">Una fila por venta o tanda: quién vendió, cuántas unidades y cuánto se recaudó.</p>
+  <p class="sub">Una fila por venta o tanda: quién vendió y cuántas unidades. El recaudo se calcula solo a $490 por remera.</p>
   <div class="con-foto">
     <div>
       <div class="tabla-wrap"><table>
@@ -243,6 +242,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const CATS=["Maquillaje","Luces","Escenografía","Utilería","Vestuario","Audio","Comida"];
+const PRECIO_REMERA=490;
 const COMPONENTES=["Agus C.","Agus M.","Boli","Cami","Flopa","Katy","Luci","Mai","María","Marti","Paz","Vicky"];
 const ICON={Maquillaje:"💄",Luces:"💡",Escenografía:"🎭",Utilería:"🪄",Vestuario:"👗",Audio:"🎤",Comida:"🍕"};
 const KEY="finanzas-proyecto-v1";
@@ -302,7 +302,7 @@ async function iniciar(){
 
 const COLS={
   rifa:[["fecha","date"],["componente","comp"],["detalle","text","Ej: recaudo del sábado"],["monto","money"]],
-  remeras:[["fecha","date"],["componente","comp"],["detalle","text","Ej: 3 talle M, a Juan"],["cantidad","int"],["recaudo","money"]],
+  remeras:[["fecha","date"],["componente","comp"],["detalle","text","Ej: 3 talle M, a Juan"],["cantidad","int"],["recaudo","calc"]],
   gastos:[["fecha","date"],["categoria","cat"],["detalle","text","Ej: bases y pinceles"],["monto","money"]],
 };
 const TB={rifa:"tbRifa",remeras:"tbRemeras",gastos:"tbGastos"};
@@ -323,11 +323,16 @@ function renderTabla(k){
   if(!D[k].length){tb.innerHTML=`<tr><td class="vacio" colspan="${COLS[k].length+1}">todavía no hay nada anotado, reina 🍓</td></tr>`;return}
   D[k].forEach((row,idx)=>{
     const tr=document.createElement("tr");
+    if(k==="remeras")row.recaudo=String(num(row.cantidad)*PRECIO_REMERA);
     COLS[k].forEach(([campo,tipo,ph])=>{
-      const td=document.createElement("td");const el=celda(tipo,row[campo],ph);
+      const td=document.createElement("td");
+      if(tipo==="calc"){const sp=document.createElement("span");sp.className="calc";sp.textContent=fmt(num(row[campo]));td.appendChild(sp);tr.appendChild(td);return}
+      const el=celda(tipo,row[campo],ph);
       el.setAttribute("aria-label",campo);
-      el.addEventListener("input",()=>{row[campo]=(tipo==="money"||tipo==="int")?el.value:el.value;guardar();totales()});
-      el.addEventListener("change",()=>{row[campo]=el.value;guardar();totales()});
+      const cambio=()=>{row[campo]=el.value;
+        if(k==="remeras"){row.recaudo=String(num(row.cantidad)*PRECIO_REMERA);tr.querySelector(".calc").textContent=fmt(num(row.recaudo))}
+        guardar();totales()};
+      el.addEventListener("input",cambio);el.addEventListener("change",cambio);
       td.appendChild(el);tr.appendChild(td);
     });
     const td=document.createElement("td");td.className="del";
@@ -339,13 +344,13 @@ function renderTabla(k){
 function totales(){
   const rifa=D.rifa.reduce((s,r)=>s+num(r.monto),0);
   const unid=D.remeras.reduce((s,r)=>s+num(r.cantidad),0);
-  const rem=D.remeras.reduce((s,r)=>s+num(r.recaudo),0);
+  const rem=D.remeras.reduce((s,r)=>s+num(r.cantidad)*PRECIO_REMERA,0);
   const porCat=Object.fromEntries(CATS.map(c=>[c,0]));
   D.gastos.forEach(g=>{if(porCat[g.categoria]!==undefined)porCat[g.categoria]+=num(g.monto)});
   const gas=Object.values(porCat).reduce((a,b)=>a+b,0);
   const ing=rifa+rem,sal=ing-gas;
   $("ftRifa").textContent=fmt(rifa);$("ftUnid").textContent=unid;$("ftRem").textContent=fmt(rem);$("ftGas").textContent=fmt(gas);
-  $("chipProm").textContent="Precio promedio por remera: "+fmt(unid?rem/unid:0);
+  $("chipProm").textContent="Precio por remera: "+fmt(PRECIO_REMERA);
   $("totIng").textContent=fmt(ing);$("totGas").textContent=fmt(gas);
   const s=$("totSal");s.textContent=fmt(sal);s.className="num "+(sal<0?"neg":sal>0?"pos":"");
   const max=Math.max(...Object.values(porCat),1);
@@ -382,7 +387,7 @@ $("btnExcel").onclick=()=>{
     ...CATS.map(c=>["Gasto: "+c,t.porCat[c]]),["TOTAL GASTOS",t.gas],[],["SALDO",t.sal]];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),"Resumen");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Monto recaudado"],...D.rifa.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.monto)])]),"Rifa del Peso");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Cantidad","Recaudo"],...D.remeras.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.cantidad),num(r.recaudo)])]),"Remeras");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Cantidad","Recaudo"],...D.remeras.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.cantidad),num(r.cantidad)*PRECIO_REMERA])]),"Remeras");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Categoría","Detalle","Monto"],...D.gastos.map(r=>[r.fecha,r.categoria,r.detalle||"",num(r.monto)])]),"Gastos");
   XLSX.writeFile(wb,"Finanzas_Proyecto.xlsx");estado("Excel descargado ⬇");
 };
