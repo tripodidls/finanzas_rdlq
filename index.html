@@ -49,8 +49,7 @@ h1,h2,h3{font-family:"Poppins",sans-serif;font-weight:900;letter-spacing:-.04em;
 .hero h1 .crema{color:#fff8ec;display:block;font-size:.62em}
 .cinta{display:inline-block;background:var(--amarillo);color:var(--tinta);font-family:"Playfair Display",serif;font-weight:600;font-style:italic;
   font-size:clamp(17px,2.6vw,24px);padding:4px 16px;transform:rotate(-2.5deg);margin:18px 0 6px;box-shadow:3px 3px 0 var(--tinta)}
-#titulo{outline:none;border-bottom:2px dashed transparent;cursor:text}
-#titulo:hover,#titulo:focus{border-bottom-color:var(--tinta)}
+#archivo{display:none}
 .botones-hero{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
 .botones-hero a{display:flex;align-items:center;gap:8px;text-decoration:none;font-weight:800;font-size:17px;color:var(--tinta);
   background:var(--rosa);border:3px solid var(--tinta);padding:12px 22px;border-radius:999px;box-shadow:4px 4px 0 var(--tinta);transition:transform .12s, box-shadow .12s}
@@ -153,7 +152,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
     <div class="txt">
       <p class="chico">las finanzas de</p>
       <h1>La Reina<span class="crema">de la Queja</span></h1>
-      <div class="cinta"><span id="titulo" contenteditable="true" spellcheck="false">Finanzas del Proyecto</span> · MJ 2026</div>
+      <div class="cinta">Finanzas 2026</div>
       <div class="botones-hero">
         <a href="#rifa">🍓 Rifas</a>
         <a href="#remeras">👚 Remeras</a>
@@ -171,7 +170,9 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 <div class="toolbar">
   <button class="primario" id="btnExcel">⬇ Descargar Excel</button>
   <button id="btnGuardar">💾 Guardar copia de datos</button>
+  <button id="btnCargar">📂 Cargar datos</button>
   <button id="btnTema" title="Cambiar modo claro / oscuro">🌙</button>
+  <input type="file" id="archivo" accept="application/json,.json">
 </div>
 <div class="estado" id="estado">Los cambios se guardan solos en este navegador ✨</div>
 
@@ -181,7 +182,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
   <div class="card sal"><span class="ico">👑</span><div class="lab">saldo</div><div class="num" id="totSal">$0</div></div>
 </div>
 
-<p class="ayuda">💡 Escribí directamente en los <b>casilleros rosas</b>. Con <b>+ Agregar</b> sumás filas y con ✕ las borrás. Todo se calcula solo. Podés cambiar el texto de la cinta amarilla tocándolo.</p>
+<p class="ayuda">💡 Escribí directamente en los <b>casilleros rosas</b>. Con <b>+ Agregar</b> sumás filas y con ✕ las borrás. Todo se calcula solo. Para pasarle tus datos a otra persona, tocá <b>Guardar copia de datos</b> y mandale el archivo: ella lo abre con <b>Cargar datos</b>.</p>
 
 <section class="bloque rifa" id="rifa">
   <div class="titulo-sec"><h2><span class="serif">la</span>Rifa del peso</h2></div>
@@ -234,7 +235,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 const CATS=["Maquillaje","Luces","Escenografía","Utilería","Vestuario","Audio"];
 const ICON={Maquillaje:"💄",Luces:"💡",Escenografía:"🎭",Utilería:"🪄",Vestuario:"👗",Audio:"🎤"};
 const KEY="finanzas-proyecto-v1";
-const vacio=()=>({titulo:"Finanzas del Proyecto",rifa:[],remeras:[],gastos:[]});
+const vacio=()=>({rifa:[],remeras:[],gastos:[]});
 let D=vacio();
 
 const $=id=>document.getElementById(id);
@@ -302,20 +303,27 @@ function totales(){
     <div class="pista"><div class="relleno" style="width:${porCat[c]/max*100}%"></div></div></div>`).join("");
   return {rifa,unid,rem,porCat,gas,ing,sal};
 }
-function render(){$("titulo").textContent=D.titulo||"Finanzas del Proyecto";Object.keys(TB).forEach(renderTabla);totales()}
+function render(){Object.keys(TB).forEach(renderTabla);totales()}
 
 document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
   const k=b.dataset.add;const fila={fecha:hoy()};if(k==="gastos")fila.categoria=CATS[0];
   D[k].push(fila);guardar();render();
   const inputs=$(TB[k]).querySelectorAll("tr:last-child input[type=text]");if(inputs[0])inputs[0].focus();
 });
-$("titulo").addEventListener("input",()=>{D.titulo=$("titulo").textContent.trim();guardar()});
-$("titulo").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();e.target.blur()}});
 
 $("btnGuardar").onclick=()=>{
   const blob=new Blob([JSON.stringify(D,null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="datos.json";a.click();
   estado("Se descargó datos.json 💾");
+};
+$("btnCargar").onclick=()=>$("archivo").click();
+$("archivo").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{const j=JSON.parse(await f.text());if(!j.rifa)throw 0;
+    if((D.rifa.length||D.remeras.length||D.gastos.length)&&!confirm("Esto reemplaza lo que tenés anotado en este navegador por los datos del archivo. ¿Seguís?")){e.target.value="";return}
+    D=Object.assign(vacio(),j);guardar();render();estado("Datos cargados 🎀")}
+  catch(_){alert("Ese archivo no parece ser un datos.json de esta página.")}
+  e.target.value="";
 };
 $("btnExcel").onclick=()=>{
   if(typeof XLSX==="undefined"){alert("No se pudo cargar el exportador. Revisá tu conexión.");return}
