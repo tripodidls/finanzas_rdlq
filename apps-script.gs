@@ -4,10 +4,10 @@
  * (Ejecutar como: Yo · Quién tiene acceso: Cualquier persona).
  */
 var HOJAS = {
-  rifa:    { nombre: 'Rifa del Peso', columnas: ['fecha', 'detalle', 'monto'],
-             encabezados: ['Fecha', 'Detalle', 'Monto recaudado'] },
-  remeras: { nombre: 'Remeras', columnas: ['fecha', 'detalle', 'cantidad', 'recaudo'],
-             encabezados: ['Fecha', 'Detalle', 'Cantidad (unidades)', 'Recaudo'] },
+  rifa:    { nombre: 'Rifa del Peso', columnas: ['fecha', 'componente', 'detalle', 'monto'],
+             encabezados: ['Fecha', 'Componente', 'Detalle', 'Monto recaudado'] },
+  remeras: { nombre: 'Remeras', columnas: ['fecha', 'componente', 'detalle', 'cantidad', 'recaudo'],
+             encabezados: ['Fecha', 'Componente', 'Detalle', 'Cantidad (unidades)', 'Recaudo'] },
   gastos:  { nombre: 'Gastos', columnas: ['fecha', 'categoria', 'detalle', 'monto'],
              encabezados: ['Fecha', 'Categoría', 'Detalle', 'Monto'] }
 };
@@ -64,33 +64,32 @@ function escribir_(k, filas) {
 
 function hoja_(k) {
   var ss = SpreadsheetApp.getActive(), cfg = HOJAS[k], h = ss.getSheetByName(cfg.nombre);
-  if (!h) {
-    h = ss.insertSheet(cfg.nombre);
-    h.getRange(1, 1, 1, cfg.encabezados.length).setValues([cfg.encabezados])
-      .setFontWeight('bold').setBackground('#fd66c3');
-    h.setFrozenRows(1);
-  }
+  if (!h) h = ss.insertSheet(cfg.nombre);
+  h.getRange(1, 1, 1, cfg.encabezados.length).setValues([cfg.encabezados])
+    .setFontWeight('bold').setBackground('#fd66c3');
+  h.setFrozenRows(1);
   return h;
 }
 
 function asegurarResumen_() {
   var ss = SpreadsheetApp.getActive();
-  if (ss.getSheetByName('Resumen')) return;
-  var r = ss.insertSheet('Resumen', 0);
-  var cats = ['Maquillaje', 'Luces', 'Escenografía', 'Utilería', 'Vestuario', 'Audio'];
+  var r = ss.getSheetByName('Resumen') || ss.insertSheet('Resumen', 0);
+  var cats = ['Maquillaje', 'Luces', 'Escenografía', 'Utilería', 'Vestuario', 'Audio', 'Comida'];
   var filas = [
     ['INGRESOS', ''],
-    ['Rifa del peso', "=SUM('Rifa del Peso'!C2:C)"],
-    ['Remeras (recaudo)', '=SUM(Remeras!D2:D)'],
-    ['Remeras vendidas (unidades)', '=SUM(Remeras!C2:C)'],
+    ['Rifa del peso', "=SUM('Rifa del Peso'!D2:D)"],
+    ['Remeras (recaudo)', '=SUM(Remeras!E2:E)'],
+    ['Remeras vendidas (unidades)', '=SUM(Remeras!D2:D)'],
     ['TOTAL INGRESOS', '=B2+B3'],
     ['', ''],
     ['GASTOS', '']
   ];
   cats.forEach(function (c) { filas.push([c, '=SUMIF(Gastos!B2:B,"' + c + '",Gastos!D2:D)']); });
-  filas.push(['TOTAL GASTOS', '=SUM(B8:B13)'], ['', ''], ['SALDO', '=B5-B14']);
+  var total = 8 + cats.length;
+  filas.push(['TOTAL GASTOS', '=SUM(B8:B' + (total - 1) + ')'], ['', ''], ['SALDO', '=B5-B' + total]);
+  r.clear();
   r.getRange(1, 1, filas.length, 2).setValues(filas);
-  r.getRange('A1:A16').setFontWeight('bold');
+  r.getRange(1, 1, filas.length, 1).setFontWeight('bold');
   r.setColumnWidth(1, 220);
 }
 
