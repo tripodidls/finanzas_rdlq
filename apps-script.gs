@@ -4,12 +4,12 @@
  * (Ejecutar como: Yo · Quién tiene acceso: Cualquier persona).
  */
 var HOJAS = {
-  rifa:    { nombre: 'Rifa del Peso', columnas: ['fecha', 'componente', 'detalle', 'monto'],
-             encabezados: ['Fecha', 'Componente', 'Detalle', 'Monto recaudado'] },
-  remeras: { nombre: 'Remeras', columnas: ['fecha', 'componente', 'detalle', 'cantidad', 'recaudo'],
-             encabezados: ['Fecha', 'Componente', 'Detalle', 'Cantidad (unidades)', 'Recaudo'] },
-  gastos:  { nombre: 'Gastos', columnas: ['fecha', 'categoria', 'detalle', 'monto'],
-             encabezados: ['Fecha', 'Categoría', 'Detalle', 'Monto'] }
+  rifa:    { nombre: 'Rifa del Peso', columnas: ['fecha', 'componente', 'detalle', 'monto', 'pagado', 'autora'],
+             encabezados: ['Fecha', 'Componente', 'Detalle', 'Monto recaudado', 'Pagado', 'Anotó'] },
+  remeras: { nombre: 'Remeras', columnas: ['fecha', 'componente', 'detalle', 'cantidad', 'recaudo', 'autora'],
+             encabezados: ['Fecha', 'Componente', 'Detalle', 'Cantidad (unidades)', 'Recaudo', 'Anotó'] },
+  gastos:  { nombre: 'Gastos', columnas: ['fecha', 'categoria', 'detalle', 'monto', 'autora'],
+             encabezados: ['Fecha', 'Categoría', 'Detalle', 'Monto', 'Anotó'] }
 };
 
 function doGet() {
@@ -34,7 +34,7 @@ function leerTodo_() {
   Object.keys(HOJAS).forEach(function (k) {
     var h = hoja_(k), cols = HOJAS[k].columnas, n = h.getLastRow() - 1;
     out[k] = n < 1 ? [] : h.getRange(2, 1, n, cols.length).getValues()
-      .filter(function (fila) { return fila.some(function (v) { return v !== ''; }); })
+      .filter(function (fila) { return fila.some(function (v) { return v !== '' && v !== false; }); })
       .map(function (fila) {
         var o = {};
         cols.forEach(function (c, i) {
@@ -56,6 +56,7 @@ function escribir_(k, filas) {
   var valores = filas.map(function (f) {
     return cols.map(function (c) {
       var v = f[c] == null ? '' : f[c];
+      if (c === 'pagado') return v === true || String(v).toLowerCase() === 'true';
       return (c === 'monto' || c === 'recaudo' || c === 'cantidad') && v !== '' ? Number(v) : v;
     });
   });
@@ -68,13 +69,17 @@ function hoja_(k) {
   h.getRange(1, 1, 1, cfg.encabezados.length).setValues([cfg.encabezados])
     .setFontWeight('bold').setBackground('#fd66c3');
   h.setFrozenRows(1);
+  var iPagado = cfg.columnas.indexOf('pagado');
+  if (iPagado >= 0 && !h.getRange(2, iPagado + 1).getDataValidation()) {
+    h.getRange(2, iPagado + 1, h.getMaxRows() - 1, 1).insertCheckboxes();
+  }
   return h;
 }
 
 function asegurarResumen_() {
   var ss = SpreadsheetApp.getActive();
   var r = ss.getSheetByName('Resumen') || ss.insertSheet('Resumen', 0);
-  var cats = ['Maquillaje', 'Luces', 'Escenografía', 'Utilería', 'Vestuario', 'Audio', 'Comida'];
+  var cats = ['Maquillaje', 'Luces', 'Escenografía', 'Utilería', 'Vestuario', 'Audio', 'Comida', 'Extra'];
   var filas = [
     ['INGRESOS', ''],
     ['Rifa del peso', "=SUM('Rifa del Peso'!D2:D)"],

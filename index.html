@@ -100,6 +100,22 @@ td input,td select{width:100%;font-family:"Poppins",sans-serif;font-size:15px;fo
   border:2px solid transparent;background:var(--input);border-radius:10px;padding:7px 9px}
 td input:focus,td select:focus{outline:none;border-color:var(--fucsia);background:var(--papel)}
 td.del{width:42px;text-align:center}
+td select{background:var(--rosa-claro);border:2px solid var(--rosa);cursor:pointer;font-weight:600}
+td select:hover{background:var(--rosa)}
+option{background:#ffe1f2;color:#1c1a20}
+td.chk{width:80px;text-align:center}
+td.chk input{width:24px;height:24px;accent-color:var(--fucsia);cursor:pointer;padding:0}
+/* color de la reina que anotó la fila */
+tbody tr.con-reina td{background:color-mix(in srgb,var(--reina) 20%,var(--papel))!important}
+tbody tr.con-reina td:first-child{box-shadow:inset 7px 0 0 var(--reina)}
+tbody tr.con-reina td input:not([type=checkbox]){background:color-mix(in srgb,var(--papel) 70%,transparent)}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.leyenda span{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;background:var(--papel);border:1.5px solid var(--borde);border-radius:999px;padding:3px 10px 3px 6px}
+.leyenda i,.punto{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--c,#ccc);border:2px solid #fff8ec}
+.quien{display:inline-flex;align-items:center;gap:10px;margin-top:18px;background:rgba(255,248,236,.1);border:2px dashed var(--rosa);border-radius:999px;padding:8px 10px 8px 16px;color:#fff8ec;font-weight:800;font-size:16px;flex-wrap:wrap}
+.quien select{font-family:"Poppins",sans-serif;font-weight:700;font-size:15px;background:var(--rosa);color:#1c1a20;border:2px solid var(--tinta);border-radius:999px;padding:6px 12px;cursor:pointer}
+.quien .punto{width:20px;height:20px}
+.chip.pend{background:var(--rosa-claro)}
 td .calc{display:block;padding:7px 9px;font-weight:700}
 td.del button{border:none;background:none;font-size:18px;padding:4px 8px;color:var(--texto-suave)}
 td.del button:hover{color:var(--rojo);background:var(--rosa-claro)}
@@ -113,7 +129,15 @@ tfoot td{font-weight:800;background:var(--amarillo)!important;color:#1c1a20;padd
 .con-foto .foto{width:100%;border-radius:18px;border:3px solid var(--tinta);transform:rotate(2deg);box-shadow:5px 5px 0 var(--tinta);background:var(--rosa)}
 
 .frase{margin:8px auto 40px;max-width:420px;padding:0 10px}
-.frase img{display:block;width:100%;border:4px solid var(--tinta);border-radius:14px;transform:rotate(-2deg);box-shadow:8px 8px 0 var(--rosa)}
+.frase img{display:block;width:100%;border:4px solid var(--tinta);border-radius:14px;box-shadow:8px 8px 0 var(--rosa);
+  animation:navega 6s ease-in-out infinite;transition:scale .3s}
+.frase img:hover{scale:1.04}
+@keyframes navega{
+  0%,100%{transform:rotate(-3deg) translate(0,0)}
+  25%{transform:rotate(1deg) translate(6px,-10px)}
+  50%{transform:rotate(3deg) translate(0,-4px)}
+  75%{transform:rotate(-1deg) translate(-6px,-12px)}}
+@media (prefers-reduced-motion:reduce){.frase img{animation:none;transform:rotate(-2deg)}}
 
 .barras{display:flex;flex-direction:column;gap:12px}
 .barra .fila{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin-bottom:4px}
@@ -138,7 +162,6 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
   .con-foto{grid-template-columns:minmax(0,1fr)}
   .con-foto .foto{max-width:260px;margin:0 auto}
   section.bloque{padding:18px}
-  .frase img{height:200px}
 }
 </style>
 </head>
@@ -167,6 +190,10 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
         <a href="#remeras">👚 Remeras</a>
         <a href="#gastos">💸 Gastos</a>
       </div>
+      <label class="quien">👑 ¿Qué reina sos?
+        <select id="reina"><option value="">Elegí…</option></select>
+        <span class="punto" id="puntoReina" aria-hidden="true"></span>
+      </label>
     </div>
     <div class="poster">
       <img class="foto-p" src="img/reina.webp" alt="Afiche de La Reina de la Queja: Barbie sacándose una selfie frente al escenario">
@@ -191,22 +218,24 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
   <div class="card sal"><span class="ico">👑</span><div class="lab">saldo</div><div class="num" id="totSal">$0</div></div>
 </div>
 
-<p class="ayuda">💡 Escribí directamente en los <b>casilleros rosas</b>. Con <b>+ Agregar</b> sumás filas y con ✕ las borrás. Todo se calcula solo. Para pasarle tus datos a otra persona, tocá <b>Guardar copia de datos</b> y mandale el archivo: ella lo abre con <b>Cargar datos</b>.</p>
+<div class="ayuda">💡 Escribí directamente en los <b>casilleros rosas</b>. Con <b>+ Agregar</b> sumás filas y con ✕ las borrás. Todo se calcula y se guarda solo. Elegí arriba <b>qué reina sos</b>: cada fila que anotes o cambies queda pintada con tu color.
+  <div class="leyenda" id="leyenda"></div></div>
 
 <section class="bloque rifa" id="rifa">
   <div class="titulo-sec"><h2><span class="serif">la</span>Rifa del peso</h2></div>
-  <p class="sub">Anotá cada recaudo y qué componente lo trajo.</p>
+  <p class="sub">Reina, detallá si transferís, pagás en efectivo o continúa pendiente.</p>
   <div class="tabla-wrap"><table>
-    <thead><tr><th style="width:150px">Fecha</th><th style="width:150px">Componente</th><th>Detalle</th><th style="width:170px">Monto recaudado</th><th></th></tr></thead>
+    <thead><tr><th style="width:150px">Fecha</th><th style="width:150px">Componente</th><th>Detalle</th><th style="width:160px">Monto recaudado</th><th style="width:80px">Pagado</th><th></th></tr></thead>
     <tbody id="tbRifa"></tbody>
-    <tfoot><tr><td colspan="3">Total rifa</td><td id="ftRifa">$0</td><td></td></tr></tfoot>
+    <tfoot><tr><td colspan="3">Total rifa</td><td id="ftRifa">$0</td><td></td><td></td></tr></tfoot>
   </table></div>
   <button class="agregar" data-add="rifa">+ Agregar recaudo</button>
+  <div class="chips"><span class="chip" id="chipPagado">✔ Pagado: $0</span><span class="chip pend" id="chipPend">⏳ Pendiente: $0</span></div>
 </section>
 
 <section class="bloque remeras" id="remeras">
   <div class="titulo-sec"><h2><span class="serif">las</span>Remes de la reina</h2></div>
-  <p class="sub">Una fila por venta o tanda: quién vendió y cuántas unidades. El recaudo se calcula solo a $490 por remera.</p>
+  <p class="sub">Una fila por venta. Si son 3 talles M de un mismo color, podés ponerlas juntas. El recaudo se calcula con cada unidad a $490.</p>
   <div class="con-foto">
     <div>
       <div class="tabla-wrap"><table>
@@ -225,7 +254,8 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 
 <section class="bloque gastos" id="gastos">
   <div class="titulo-sec"><h2><span class="serif">los</span>Gastos</h2></div>
-  <p class="sub">Elegí la categoría: maquillaje, luces, escenografía, utilería, vestuario, audio o comida.</p>
+  <p class="sub">Elegí la categoría.</p>
+  <p class="sub"><b>Editable para grupo finanzas.</b> Si hiciste algún mandado, elegí la categoría <b>Extra</b> y especificá en el renglón.</p>
   <div class="tabla-wrap"><table>
     <thead><tr><th style="width:150px">Fecha</th><th style="width:170px">Categoría</th><th>Detalle</th><th style="width:150px">Monto</th><th></th></tr></thead>
     <tbody id="tbGastos"></tbody>
@@ -236,15 +266,18 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
   <div class="barras" id="barras"></div>
 </section>
 
-<footer><img src="img/frutilla.webp" alt="">hecho con 💖 para La Reina de la Queja · los datos quedan guardados en este navegador</footer>
+<footer><img src="img/frutilla.webp" alt="">hecho con 💖 para La Reina de la Queja · los datos se comparten con todo el grupo</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-const CATS=["Maquillaje","Luces","Escenografía","Utilería","Vestuario","Audio","Comida"];
+const CATS=["Maquillaje","Luces","Escenografía","Utilería","Vestuario","Audio","Comida","Extra"];
 const PRECIO_REMERA=490;
 const COMPONENTES=["Agus C.","Agus M.","Boli","Cami","Flopa","Katy","Luci","Mai","María","Marti","Paz","Vicky"];
-const ICON={Maquillaje:"💄",Luces:"💡",Escenografía:"🎭",Utilería:"🪄",Vestuario:"👗",Audio:"🎤",Comida:"🍕"};
+const ICON={Maquillaje:"💄",Luces:"💡",Escenografía:"🎭",Utilería:"🪄",Vestuario:"👗",Audio:"🎤",Comida:"🍕",Extra:"🛍️"};
+const COLOR={"Agus C.":"#ff3ea5","Agus M.":"#9b5cff","Boli":"#ff8a3d","Cami":"#22b573","Flopa":"#f2c200","Katy":"#e23744",
+  "Luci":"#3d5afe","Mai":"#00a6a0","María":"#b0127a","Marti":"#8d5a3c","Paz":"#7cb342","Vicky":"#d16ae8"};
+let REINA="";try{REINA=localStorage.getItem("reina")||""}catch(e){}
 const KEY="finanzas-proyecto-v1";
 const vacio=()=>({rifa:[],remeras:[],gastos:[]});
 let D=vacio();
@@ -255,7 +288,7 @@ const num=v=>{const x=parseFloat(String(v??"").replace(/\./g,"").replace(",","."
 const hoy=()=>new Date().toISOString().slice(0,10);
 // ⬇⬇ Pegá acá entre las comillas el link de la "Aplicación web" de Google Apps Script ⬇⬇
 const URL_SHEETS="https://script.google.com/macros/s/AKfycbxjQJTFMO8x-9WLP8DWb47jLKLWdp7Cg8_fHsCSEMAJBtXC0OGPRotHBkjFL3Nk5X_d5Q/exec";
-const MSG=URL_SHEETS?"Datos compartidos: todos los que entran ven lo mismo ✨":"Los cambios se guardan solos en este navegador ✨";
+const MSG=URL_SHEETS?"Datos compartidos: todas las que entran ven lo mismo. No hace falta apretar ni guardar nada, cada cambio se sube solo ✨":"Los cambios se guardan solos en este navegador ✨";
 function estado(t,fijo){$("estado").textContent=t;clearTimeout(estado.t);if(!fijo)estado.t=setTimeout(()=>$("estado").textContent=MSG,2500)}
 
 let pendiente=null,enviando=false,ultimo="";
@@ -270,52 +303,62 @@ async function enviar(){
   try{
     const cuerpo=JSON.stringify({rifa:D.rifa,remeras:D.remeras,gastos:D.gastos});
     const r=await fetch(URL_SHEETS,{method:"POST",body:cuerpo});
-    if(!r.ok)throw 0;ultimo=cuerpo;estado("Guardado ✓ ya lo pueden ver todos");
+    if(!r.ok)throw 0;ultimo=cuerpo;estado("Guardado ✓ ya lo pueden ver todas");
   }catch(e){estado("⚠ No se pudo guardar en internet. Revisá la conexión; se reintenta al próximo cambio.",true)}
   enviando=false;
 }
+function normalizar(d){
+  const o=vacio();
+  Object.keys(COLS).forEach(k=>{o[k]=(d&&d[k]||[]).map(f=>{const n={};
+    COLS[k].forEach(([c,t])=>{n[c]=t==="check"?(f[c]===true||String(f[c]).toLowerCase()==="true"):String(f[c]??"")});
+    n.autora=String(f.autora??"");
+    if(k==="remeras")n.recaudo=String(num(n.cantidad)*PRECIO_REMERA);
+    return n})});
+  return o;
+}
 async function traer(){
   const r=await fetch(URL_SHEETS+(URL_SHEETS.includes("?")?"&":"?")+"t="+Date.now());
-  if(!r.ok)throw 0;const j=await r.json();if(!j||!j.rifa)throw 0;return j;
+  if(!r.ok)throw 0;const j=await r.json();if(!j||!j.rifa)throw 0;return normalizar(j);
 }
 // trae los cambios de otras personas, sin interrumpir si alguien está escribiendo
 async function refrescar(){
   if(!URL_SHEETS||pendiente||enviando)return;
   const a=document.activeElement;if(a&&/INPUT|SELECT/.test(a.tagName))return;
   try{const j=await traer();const nuevo=JSON.stringify({rifa:j.rifa,remeras:j.remeras,gastos:j.gastos});
-    if(nuevo!==JSON.stringify({rifa:D.rifa,remeras:D.remeras,gastos:D.gastos})){D=Object.assign(vacio(),j);ultimo=nuevo;
+    if(nuevo!==JSON.stringify({rifa:D.rifa,remeras:D.remeras,gastos:D.gastos})){D=j;ultimo=nuevo;
       try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}render();estado("Se actualizaron los datos 🔄")}}catch(e){}
 }
 async function iniciar(){
   let local=null;try{local=JSON.parse(localStorage.getItem(KEY))}catch(e){}
   if(URL_SHEETS){
-    if(local&&local.rifa){D=local;render()}
+    if(local&&local.rifa){local=normalizar(local);D=local;render()}
     estado("Cargando datos compartidos…",true);
-    try{const remoto=Object.assign(vacio(),await traer());
+    try{const remoto=await traer();
       const tiene=x=>x&&((x.rifa||[]).length||(x.remeras||[]).length||(x.gastos||[]).length);
       // si la planilla está vacía pero este navegador ya tenía datos, los sube
-      if(!tiene(remoto)&&tiene(local)){D=Object.assign(vacio(),local);render();guardar()}
+      if(!tiene(remoto)&&tiene(local)){D=local;render();guardar()}
       else{D=remoto;try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}estado(MSG,true)}}
     catch(e){estado("⚠ No se pudieron traer los datos compartidos. Mostrando la última copia de este navegador.",true)}
     setInterval(refrescar,30000);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refrescar()});
-  }else if(local&&local.rifa){D=local}
-  else{try{const r=await fetch("datos.json",{cache:"no-store"});if(r.ok){const j=await r.json();if(j&&j.rifa)D=j}}catch(e){}}
+  }else if(local&&local.rifa){D=normalizar(local)}
+  else{try{const r=await fetch("datos.json",{cache:"no-store"});if(r.ok){const j=await r.json();if(j&&j.rifa)D=normalizar(j)}}catch(e){}}
   render();
 }
 
 const COLS={
-  rifa:[["fecha","date"],["componente","comp"],["detalle","text","Ej: recaudo del sábado"],["monto","money"]],
-  remeras:[["fecha","date"],["componente","comp"],["detalle","text","Ej: 3 talle M, a Juan"],["cantidad","int"],["recaudo","calc"]],
+  rifa:[["fecha","date"],["componente","comp"],["detalle","text","Ej: transferencia / efectivo / pendiente"],["monto","money"],["pagado","check"]],
+  remeras:[["fecha","date"],["componente","comp"],["detalle","text","Ej: 3 talle M negras"],["cantidad","int"],["recaudo","calc"]],
   gastos:[["fecha","date"],["categoria","cat"],["detalle","text","Ej: bases y pinceles"],["monto","money"]],
 };
 const TB={rifa:"tbRifa",remeras:"tbRemeras",gastos:"tbGastos"};
 
 function celda(tipo,valor,ph){
   if(tipo==="cat"){const s=document.createElement("select");
-    s.innerHTML=CATS.map(c=>`<option ${c===valor?"selected":""}>${c}</option>`).join("");return s}
+    s.innerHTML=CATS.map(c=>`<option value="${c}" ${c===valor?"selected":""}>✨ ${c}</option>`).join("");return s}
   if(tipo==="comp"){const s=document.createElement("select");
-    s.innerHTML=`<option value="">Elegí…</option>`+COMPONENTES.map(c=>`<option ${c===valor?"selected":""}>${c}</option>`).join("");return s}
+    s.innerHTML=`<option value="">Elegí…</option>`+COMPONENTES.map(c=>`<option value="${c}" ${c===valor?"selected":""}>🍓 ${c}</option>`).join("");return s}
+  if(tipo==="check"){const i=document.createElement("input");i.type="checkbox";i.checked=valor===true;return i}
   const i=document.createElement("input");
   if(tipo==="date"){i.type="date"}
   else if(tipo==="money"||tipo==="int"){i.type="number";i.inputMode="decimal";i.min="0";i.step=tipo==="int"?"1":"any";i.placeholder="0"}
@@ -326,14 +369,15 @@ function renderTabla(k){
   const tb=$(TB[k]);tb.innerHTML="";
   if(!D[k].length){tb.innerHTML=`<tr><td class="vacio" colspan="${COLS[k].length+1}">todavía no hay nada anotado, reina 🍓</td></tr>`;return}
   D[k].forEach((row,idx)=>{
-    const tr=document.createElement("tr");
+    const tr=document.createElement("tr");pintarFila(tr,row);
     if(k==="remeras")row.recaudo=String(num(row.cantidad)*PRECIO_REMERA);
     COLS[k].forEach(([campo,tipo,ph])=>{
-      const td=document.createElement("td");
+      const td=document.createElement("td");if(tipo==="check")td.className="chk";
       if(tipo==="calc"){const sp=document.createElement("span");sp.className="calc";sp.textContent=fmt(num(row[campo]));td.appendChild(sp);tr.appendChild(td);return}
       const el=celda(tipo,row[campo],ph);
       el.setAttribute("aria-label",campo);
-      const cambio=()=>{row[campo]=el.value;
+      const cambio=()=>{const v=tipo==="check"?el.checked:el.value;if(v===row[campo])return;row[campo]=v;
+        if(REINA){row.autora=REINA;pintarFila(tr,row)}
         if(k==="remeras"){row.recaudo=String(num(row.cantidad)*PRECIO_REMERA);tr.querySelector(".calc").textContent=fmt(num(row.recaudo))}
         guardar();totales()};
       el.addEventListener("input",cambio);el.addEventListener("change",cambio);
@@ -345,8 +389,14 @@ function renderTabla(k){
     td.appendChild(b);tr.appendChild(td);tb.appendChild(tr);
   });
 }
+function pintarFila(tr,row){
+  const c=COLOR[row.autora];tr.classList.toggle("con-reina",!!c);
+  if(c){tr.style.setProperty("--reina",c);tr.title="Anotó: "+row.autora}else{tr.style.removeProperty("--reina");tr.removeAttribute("title")}
+}
 function totales(){
   const rifa=D.rifa.reduce((s,r)=>s+num(r.monto),0);
+  const pagado=D.rifa.reduce((s,r)=>s+(r.pagado===true?num(r.monto):0),0);
+  $("chipPagado").textContent="✔ Pagado: "+fmt(pagado);$("chipPend").textContent="⏳ Pendiente: "+fmt(rifa-pagado);
   const unid=D.remeras.reduce((s,r)=>s+num(r.cantidad),0);
   const rem=D.remeras.reduce((s,r)=>s+num(r.cantidad)*PRECIO_REMERA,0);
   const porCat=Object.fromEntries(CATS.map(c=>[c,0]));
@@ -365,8 +415,9 @@ function totales(){
 function render(){Object.keys(TB).forEach(renderTabla);totales()}
 
 document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
-  const k=b.dataset.add;const fila={fecha:hoy()};if(k==="gastos")fila.categoria=CATS[0];
-  D[k].push(fila);guardar();render();
+  const k=b.dataset.add;const fila={fecha:hoy(),autora:REINA};
+  if(k==="gastos")fila.categoria=CATS[0];else fila.componente=REINA;
+  D[k].push(normalizar({[k]:[fila]})[k][0]);guardar();render();
   const inputs=$(TB[k]).querySelectorAll("tr:last-child input[type=text]");if(inputs[0])inputs[0].focus();
 });
 
@@ -380,7 +431,7 @@ $("archivo").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   try{const j=JSON.parse(await f.text());if(!j.rifa)throw 0;
     if((D.rifa.length||D.remeras.length||D.gastos.length)&&!confirm("Esto reemplaza lo que tenés anotado en este navegador por los datos del archivo. ¿Seguís?")){e.target.value="";return}
-    D=Object.assign(vacio(),j);guardar();render();estado("Datos cargados 🎀")}
+    D=normalizar(j);guardar();render();estado("Datos cargados 🎀")}
   catch(_){alert("Ese archivo no parece ser un datos.json de esta página.")}
   e.target.value="";
 };
@@ -390,9 +441,9 @@ $("btnExcel").onclick=()=>{
   const res=[["Concepto","Monto"],["Rifa del peso",t.rifa],["Remeras (recaudo)",t.rem],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
     ...CATS.map(c=>["Gasto: "+c,t.porCat[c]]),["TOTAL GASTOS",t.gas],[],["SALDO",t.sal]];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),"Resumen");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Monto recaudado"],...D.rifa.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.monto)])]),"Rifa del Peso");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Cantidad","Recaudo"],...D.remeras.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.cantidad),num(r.cantidad)*PRECIO_REMERA])]),"Remeras");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Categoría","Detalle","Monto"],...D.gastos.map(r=>[r.fecha,r.categoria,r.detalle||"",num(r.monto)])]),"Gastos");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Monto recaudado","Pagado","Anotó"],...D.rifa.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.monto),r.pagado?"Sí":"No",r.autora||""])]),"Rifa del Peso");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Cantidad","Recaudo","Anotó"],...D.remeras.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.cantidad),num(r.cantidad)*PRECIO_REMERA,r.autora||""])]),"Remeras");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Categoría","Detalle","Monto","Anotó"],...D.gastos.map(r=>[r.fecha,r.categoria,r.detalle||"",num(r.monto),r.autora||""])]),"Gastos");
   XLSX.writeFile(wb,"Finanzas_Proyecto.xlsx");estado("Excel descargado ⬇");
 };
 // tema claro/oscuro
@@ -419,6 +470,13 @@ document.addEventListener("click",e=>{
     document.body.appendChild(f);f.addEventListener("animationend",()=>f.remove());
   }
 });
+// ¿qué reina sos?
+(function(){const sel=$("reina");
+  sel.innerHTML+=COMPONENTES.map(c=>`<option value="${c}">🍓 ${c}</option>`).join("");sel.value=REINA;
+  const punto=()=>{$("puntoReina").style.setProperty("--c",COLOR[REINA]||"transparent");$("puntoReina").style.visibility=REINA?"visible":"hidden"};punto();
+  sel.onchange=()=>{REINA=sel.value;try{localStorage.setItem("reina",REINA)}catch(e){}punto();if(REINA)estado("¡Hola, "+REINA+"! Lo que anotes queda con tu color 👑")};
+  $("leyenda").innerHTML=COMPONENTES.map(c=>`<span><i style="--c:${COLOR[c]}"></i>${c}</span>`).join("");
+})();
 iniciar();
 </script>
 </body>
