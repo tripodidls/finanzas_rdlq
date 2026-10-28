@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finanzas del Proyecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rosa:#e04f9a; --rosa-fuerte:#c2185b; --rosa-claro:#fde3f0; --rosa-suave:#fff4fa;
+  --lila:#a77bd8; --lila-claro:#ede2fa; --celeste:#5fc3ea; --celeste-claro:#e3f4fc;
+  --texto:#4a2a4f; --texto-suave:#8a6a90; --borde:#f3c6de; --blanco:#ffffff;
+  --fondo:#fff7fb; --rojo:#d6336c; --verde:#2f9e8f;
+  --sombra:0 8px 24px rgba(224,79,154,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --rosa:#ff7ab8; --rosa-fuerte:#ff9fcb; --rosa-claro:#4a2340; --rosa-suave:#2d1729;
+    --lila:#c3a2ee; --lila-claro:#3a2a52; --celeste:#7fd3f3; --celeste-claro:#1f3a4a;
+    --texto:#fbe9f4; --texto-suave:#d6b3cf; --borde:#5c3355; --blanco:#24131f;
+    --fondo:#1c0f19; --rojo:#ff8fb0; --verde:#6fd6c6; --sombra:0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --rosa:#ff7ab8; --rosa-fuerte:#ff9fcb; --rosa-claro:#4a2340; --rosa-suave:#2d1729;
+  --lila:#c3a2ee; --lila-claro:#3a2a52; --celeste:#7fd3f3; --celeste-claro:#1f3a4a;
+  --texto:#fbe9f4; --texto-suave:#d6b3cf; --borde:#5c3355; --blanco:#24131f;
+  --fondo:#1c0f19; --rojo:#ff8fb0; --verde:#6fd6c6; --sombra:0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:"Quicksand",system-ui,sans-serif; color:var(--texto); background:var(--fondo);
+  background-image:
+    radial-gradient(circle at 10% 10%, var(--rosa-claro) 0 120px, transparent 121px),
+    radial-gradient(circle at 95% 30%, var(--lila-claro) 0 160px, transparent 161px),
+    radial-gradient(circle at 5% 85%, var(--celeste-claro) 0 140px, transparent 141px);
+  background-attachment:fixed; min-height:100vh;
+}
+h1,h2,h3,.num{font-family:"Fredoka",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:24px 16px 64px}
+header.hero{
+  position:relative; text-align:center; padding:36px 20px 30px; border-radius:28px;
+  background:linear-gradient(135deg,var(--rosa) 0%,var(--lila) 55%,var(--celeste) 100%);
+  color:#fff; box-shadow:var(--sombra); overflow:hidden;
+}
+header.hero h1{margin:6px 0 4px;font-size:clamp(28px,6vw,46px);font-weight:700;letter-spacing:.5px;
+  text-shadow:0 2px 0 rgba(0,0,0,.08); outline:none; border-radius:10px; padding:0 8px; display:inline-block}
+header.hero h1:focus{background:rgba(255,255,255,.18)}
+header.hero p{margin:0;font-weight:600;opacity:.95}
+.deco{position:absolute;pointer-events:none;opacity:.95}
+.sparkle{position:absolute;color:#fff;font-size:18px;opacity:.85;animation:tw 2.4s ease-in-out infinite}
+@keyframes tw{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.35);opacity:.4}}
+@media (prefers-reduced-motion:reduce){.sparkle{animation:none}}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0 6px}
+button,.btn{
+  font-family:"Quicksand",sans-serif;font-weight:700;font-size:14px;border:2px solid var(--rosa);
+  background:var(--blanco);color:var(--rosa-fuerte);padding:8px 14px;border-radius:999px;cursor:pointer;
+  transition:transform .1s, background .15s;
+}
+button:hover,.btn:hover{background:var(--rosa-claro)}
+button:active{transform:scale(.97)}
+button.primario{background:var(--rosa);color:#fff}
+button.primario:hover{background:var(--rosa-fuerte)}
+button.peligro{border-color:var(--rojo);color:var(--rojo)}
+.estado{text-align:center;font-size:13px;color:var(--texto-suave);min-height:18px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 26px}
+.card{background:var(--blanco);border:2px solid var(--borde);border-radius:22px;padding:16px 18px;box-shadow:var(--sombra);position:relative}
+.card .lab{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--texto-suave)}
+.card .num{font-size:clamp(22px,4vw,32px);font-weight:600;margin-top:4px}
+.card .ico{position:absolute;right:14px;top:12px;font-size:22px}
+.card.ing{border-color:var(--celeste)} .card.gas{border-color:var(--lila)} .card.sal{border-color:var(--rosa)}
+.neg{color:var(--rojo)} .pos{color:var(--verde)}
+section.bloque{background:var(--blanco);border:2px solid var(--borde);border-radius:26px;padding:20px;margin-bottom:22px;box-shadow:var(--sombra)}
+section.bloque h2{margin:0 0 4px;font-size:24px;display:flex;align-items:center;gap:10px}
+section.bloque .sub{margin:0 0 14px;color:var(--texto-suave);font-size:14px}
+section.rifa h2{color:var(--rosa-fuerte)} section.remeras h2{color:var(--lila)} section.gastos h2{color:var(--celeste)}
+section.remeras h2{color:#8a5cc4}
+:root[data-theme="dark"] section.remeras h2{color:var(--lila)}
+.tabla-wrap{overflow-x:auto;border-radius:16px;border:2px solid var(--borde)}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th{font-family:"Fredoka",sans-serif;font-weight:600;font-size:14px;text-align:left;padding:10px;color:#fff;background:var(--rosa)}
+section.remeras th{background:var(--lila)} section.gastos th{background:var(--celeste)}
+td{padding:6px;border-top:1px solid var(--borde)}
+tr:nth-child(even) td{background:var(--rosa-suave)}
+td input,td select{
+  width:100%;font-family:"Quicksand",sans-serif;font-size:15px;font-weight:600;color:var(--texto);
+  border:2px solid transparent;background:var(--celeste-claro);border-radius:10px;padding:7px 9px;
+}
+td input:focus,td select:focus{outline:none;border-color:var(--rosa);background:var(--blanco)}
+td.del{width:42px;text-align:center}
+td.del button{border:none;background:none;font-size:18px;padding:4px 8px;color:var(--texto-suave)}
+td.del button:hover{color:var(--rojo);background:var(--rosa-claro)}
+tfoot td{font-weight:700;background:var(--lila-claro)!important;padding:10px}
+.agregar{margin-top:12px}
+.vacio{text-align:center;color:var(--texto-suave);padding:16px!important;font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.chip{background:var(--lila-claro);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.barras{display:flex;flex-direction:column;gap:10px}
+.barra .fila{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin-bottom:4px}
+.barra .pista{height:14px;border-radius:999px;background:var(--rosa-suave);border:1px solid var(--borde);overflow:hidden}
+.barra .relleno{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--rosa),var(--lila),var(--celeste));transition:width .3s}
+footer{text-align:center;color:var(--texto-suave);font-size:13px;margin-top:30px}
+.ayuda{background:var(--celeste-claro);border-radius:18px;padding:12px 16px;font-size:14px;margin:0 0 18px}
+.ayuda b{color:var(--rosa-fuerte)}
+#archivo{display:none}
+@media (max-width:760px){
+  .cards{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr}
+  section.bloque{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <!-- moño -->
+  <svg class="deco" style="left:18px;top:14px;width:78px" viewBox="0 0 100 60" aria-hidden="true">
+    <path d="M50 30 C30 5,5 5,8 30 C5 55,30 55,50 30Z" fill="#ffd1e8" stroke="#fff" stroke-width="3"/>
+    <path d="M50 30 C70 5,95 5,92 30 C95 55,70 55,50 30Z" fill="#ffd1e8" stroke="#fff" stroke-width="3"/>
+    <path d="M44 34 L36 58 L46 52 L50 60 L52 36Z" fill="#ffb3d6" stroke="#fff" stroke-width="2"/>
+    <path d="M56 34 L64 58 L54 52 L50 60 L48 36Z" fill="#ffb3d6" stroke="#fff" stroke-width="2"/>
+    <circle cx="50" cy="30" r="9" fill="#ff8fc4" stroke="#fff" stroke-width="3"/>
+  </svg>
+  <!-- frutilla -->
+  <svg class="deco" style="right:22px;top:16px;width:62px" viewBox="0 0 64 72" aria-hidden="true">
+    <path d="M32 18 C10 14,2 30,8 44 C14 58,26 70,32 70 C38 70,50 58,56 44 C62 30,54 14,32 18Z" fill="#ff4d7d" stroke="#fff" stroke-width="3"/>
+    <g fill="#ffe08a"><ellipse cx="20" cy="32" rx="2" ry="3"/><ellipse cx="32" cy="30" rx="2" ry="3"/><ellipse cx="44" cy="32" rx="2" ry="3"/>
+    <ellipse cx="16" cy="44" rx="2" ry="3"/><ellipse cx="28" cy="42" rx="2" ry="3"/><ellipse cx="40" cy="43" rx="2" ry="3"/><ellipse cx="50" cy="44" rx="2" ry="3"/>
+    <ellipse cx="24" cy="54" rx="2" ry="3"/><ellipse cx="36" cy="55" rx="2" ry="3"/><ellipse cx="31" cy="64" rx="2" ry="3"/></g>
+    <path d="M32 20 L22 8 L30 12 L32 2 L34 12 L42 8Z" fill="#5cc98a" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+  </svg>
+  <!-- zapato -->
+  <svg class="deco" style="left:30px;bottom:12px;width:66px" viewBox="0 0 100 60" aria-hidden="true">
+    <path d="M8 44 C8 30,20 26,30 34 L58 46 C66 50,80 48,90 44 C96 42,98 52,90 54 L20 54 C12 54,8 50,8 44Z" fill="#ff8fc4" stroke="#fff" stroke-width="3"/>
+    <path d="M14 52 L14 34 L8 30" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  </svg>
+  <!-- labial -->
+  <svg class="deco" style="right:34px;bottom:10px;width:30px" viewBox="0 0 30 70" aria-hidden="true">
+    <rect x="5" y="38" width="20" height="30" rx="3" fill="#c3a2ee" stroke="#fff" stroke-width="3"/>
+    <rect x="8" y="26" width="14" height="14" fill="#e9dcfb" stroke="#fff" stroke-width="2"/>
+    <path d="M9 26 L9 10 L21 2 L21 26Z" fill="#e04f9a" stroke="#fff" stroke-width="2"/>
+  </svg>
+  <span class="sparkle" style="left:22%;top:18%">✦</span>
+  <span class="sparkle" style="left:78%;top:62%;animation-delay:.8s">✦</span>
+  <span class="sparkle" style="left:12%;top:58%;animation-delay:1.4s">♥</span>
+  <span class="sparkle" style="left:86%;top:12%;animation-delay:.4s">♥</span>
+
+  <p>💖 nuestro proyecto 💖</p>
+  <h1 id="titulo" contenteditable="true" spellcheck="false">Finanzas del Proyecto</h1>
+  <p>rifas · remeras · gastos</p>
+</header>
+
+<div class="toolbar">
+  <button class="primario" id="btnExcel">⬇ Descargar Excel</button>
+  <button id="btnGuardar">💾 Guardar copia de datos</button>
+  <button id="btnCargar">📂 Cargar datos</button>
+  <button class="peligro" id="btnBorrar">Borrar todo</button>
+  <button id="btnTema" title="Cambiar modo claro / oscuro">🌙</button>
+  <input type="file" id="archivo" accept="application/json,.json">
+</div>
+<div class="estado" id="estado">Los cambios se guardan solos en este navegador ✨</div>
+
+<div class="cards">
+  <div class="card ing"><span class="ico">🍓</span><div class="lab">Ingresos</div><div class="num" id="totIng">$0</div></div>
+  <div class="card gas"><span class="ico">🎀</span><div class="lab">Gastos</div><div class="num" id="totGas">$0</div></div>
+  <div class="card sal"><span class="ico">💖</span><div class="lab">Saldo</div><div class="num" id="totSal">$0</div></div>
+</div>
+
+<p class="ayuda">💡 Escribí directamente en los <b>casilleros celestes</b>. Con <b>+ Agregar</b> sumás filas y con ✕ las borrás. Todo se calcula solo. Podés cambiar el título tocándolo.</p>
+
+<section class="bloque rifa">
+  <h2>🍓 Rifa del peso</h2>
+  <p class="sub">Anotá el total recaudado (en una sola fila o un recaudo por fila).</p>
+  <div class="tabla-wrap"><table>
+    <thead><tr><th style="width:150px">Fecha</th><th>Detalle</th><th style="width:170px">Monto recaudado</th><th></th></tr></thead>
+    <tbody id="tbRifa"></tbody>
+    <tfoot><tr><td colspan="2">Total rifa</td><td id="ftRifa">$0</td><td></td></tr></tfoot>
+  </table></div>
+  <button class="agregar" data-add="rifa">+ Agregar recaudo</button>
+</section>
+
+<section class="bloque remeras">
+  <h2>👚 Remeras</h2>
+  <p class="sub">Una fila por venta o tanda: cuántas unidades y cuánto se recaudó.</p>
+  <div class="tabla-wrap"><table>
+    <thead><tr><th style="width:150px">Fecha</th><th>Detalle (talle, comprador…)</th><th style="width:120px">Unidades</th><th style="width:160px">Recaudo</th><th></th></tr></thead>
+    <tbody id="tbRemeras"></tbody>
+    <tfoot><tr><td colspan="2">Totales</td><td id="ftUnid">0</td><td id="ftRem">$0</td><td></td></tr></tfoot>
+  </table></div>
+  <button class="agregar" data-add="remeras">+ Agregar venta</button>
+  <div class="chips"><span class="chip" id="chipProm">Precio promedio: $0</span></div>
+</section>
+
+<section class="bloque gastos">
+  <h2>🎀 Gastos</h2>
+  <p class="sub">Elegí la categoría: maquillaje, luces, escenografía, utilería, vestuario o audio.</p>
+  <div class="tabla-wrap"><table>
+    <thead><tr><th style="width:150px">Fecha</th><th style="width:170px">Categoría</th><th>Detalle</th><th style="width:160px">Monto</th><th></th></tr></thead>
+    <tbody id="tbGastos"></tbody>
+    <tfoot><tr><td colspan="3">Total gastos</td><td id="ftGas">$0</td><td></td></tr></tfoot>
+  </table></div>
+  <button class="agregar" data-add="gastos">+ Agregar gasto</button>
+  <h3 style="margin:22px 0 10px">Gastos por categoría</h3>
+  <div class="barras" id="barras"></div>
+</section>
+
+<footer>hecho con 💖🍓🎀 · los datos quedan guardados en este navegador</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const CATS=["Maquillaje","Luces","Escenografía","Utilería","Vestuario","Audio"];
+const ICON={Maquillaje:"💄",Luces:"💡",Escenografía:"🏰",Utilería:"🪄",Vestuario:"👗",Audio:"🎤"};
+const KEY="finanzas-proyecto-v1";
+const vacio=()=>({titulo:"Finanzas del Proyecto",rifa:[],remeras:[],gastos:[]});
+let D=vacio();
+
+const $=id=>document.getElementById(id);
+const fmt=n=>(n<0?"-":"")+"$"+Math.abs(Math.round(n)).toLocaleString("es-AR");
+const num=v=>{const x=parseFloat(String(v??"").replace(/\./g,"").replace(",","."));return isFinite(x)?x:0};
+const hoy=()=>new Date().toISOString().slice(0,10);
+function estado(t){$("estado").textContent=t;clearTimeout(estado.t);estado.t=setTimeout(()=>$("estado").textContent="Los cambios se guardan solos en este navegador ✨",2500)}
+
+function guardar(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+async function iniciar(){
+  let local=null;try{local=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(local&&local.rifa){D=local}
+  else{try{const r=await fetch("datos.json",{cache:"no-store"});if(r.ok){const j=await r.json();if(j&&j.rifa)D=j}}catch(e){}}
+  render();
+}
+
+const COLS={
+  rifa:[["fecha","date"],["detalle","text","Ej: recaudo del sábado"],["monto","money"]],
+  remeras:[["fecha","date"],["detalle","text","Ej: 3 talle M"],["cantidad","int"],["recaudo","money"]],
+  gastos:[["fecha","date"],["categoria","cat"],["detalle","text","Ej: bases y pinceles"],["monto","money"]],
+};
+const TB={rifa:"tbRifa",remeras:"tbRemeras",gastos:"tbGastos"};
+
+function celda(tipo,valor,ph){
+  if(tipo==="cat"){const s=document.createElement("select");
+    s.innerHTML=CATS.map(c=>`<option ${c===valor?"selected":""}>${c}</option>`).join("");return s}
+  const i=document.createElement("input");
+  if(tipo==="date"){i.type="date"}
+  else if(tipo==="money"||tipo==="int"){i.type="number";i.inputMode="decimal";i.min="0";i.step=tipo==="int"?"1":"any";i.placeholder="0"}
+  else{i.type="text";i.placeholder=ph||""}
+  i.value=valor??"";return i;
+}
+function renderTabla(k){
+  const tb=$(TB[k]);tb.innerHTML="";
+  if(!D[k].length){tb.innerHTML=`<tr><td class="vacio" colspan="${COLS[k].length+1}">Todavía no hay nada anotado 🍓</td></tr>`;return}
+  D[k].forEach((row,idx)=>{
+    const tr=document.createElement("tr");
+    COLS[k].forEach(([campo,tipo,ph])=>{
+      const td=document.createElement("td");const el=celda(tipo,row[campo],ph);
+      el.setAttribute("aria-label",campo);
+      el.addEventListener("input",()=>{row[campo]=(tipo==="money"||tipo==="int")?el.value:el.value;guardar();totales()});
+      el.addEventListener("change",()=>{row[campo]=el.value;guardar();totales()});
+      td.appendChild(el);tr.appendChild(td);
+    });
+    const td=document.createElement("td");td.className="del";
+    const b=document.createElement("button");b.textContent="✕";b.title="Borrar fila";
+    b.onclick=()=>{D[k].splice(idx,1);guardar();render()};
+    td.appendChild(b);tr.appendChild(td);tb.appendChild(tr);
+  });
+}
+function totales(){
+  const rifa=D.rifa.reduce((s,r)=>s+num(r.monto),0);
+  const unid=D.remeras.reduce((s,r)=>s+num(r.cantidad),0);
+  const rem=D.remeras.reduce((s,r)=>s+num(r.recaudo),0);
+  const porCat=Object.fromEntries(CATS.map(c=>[c,0]));
+  D.gastos.forEach(g=>{if(porCat[g.categoria]!==undefined)porCat[g.categoria]+=num(g.monto)});
+  const gas=Object.values(porCat).reduce((a,b)=>a+b,0);
+  const ing=rifa+rem,sal=ing-gas;
+  $("ftRifa").textContent=fmt(rifa);$("ftUnid").textContent=unid;$("ftRem").textContent=fmt(rem);$("ftGas").textContent=fmt(gas);
+  $("chipProm").textContent="Precio promedio por remera: "+fmt(unid?rem/unid:0);
+  $("totIng").textContent=fmt(ing);$("totGas").textContent=fmt(gas);
+  const s=$("totSal");s.textContent=fmt(sal);s.className="num "+(sal<0?"neg":sal>0?"pos":"");
+  const max=Math.max(...Object.values(porCat),1);
+  $("barras").innerHTML=CATS.map(c=>`<div class="barra"><div class="fila"><span>${ICON[c]} ${c}</span><span>${fmt(porCat[c])}</span></div>
+    <div class="pista"><div class="relleno" style="width:${porCat[c]/max*100}%"></div></div></div>`).join("");
+  return {rifa,unid,rem,porCat,gas,ing,sal};
+}
+function render(){$("titulo").textContent=D.titulo||"Finanzas del Proyecto";Object.keys(TB).forEach(renderTabla);totales();document.title=$("titulo").textContent}
+
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{
+  const k=b.dataset.add;const fila={fecha:hoy()};if(k==="gastos")fila.categoria=CATS[0];
+  D[k].push(fila);guardar();render();
+  const inputs=$(TB[k]).querySelectorAll("tr:last-child input[type=text]");if(inputs[0])inputs[0].focus();
+});
+$("titulo").addEventListener("input",()=>{D.titulo=$("titulo").textContent.trim();document.title=D.titulo;guardar()});
+$("titulo").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();e.target.blur()}});
+
+$("btnGuardar").onclick=()=>{
+  const blob=new Blob([JSON.stringify(D,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="datos.json";a.click();
+  estado("Se descargó datos.json 💾");
+};
+$("btnCargar").onclick=()=>$("archivo").click();
+$("archivo").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{const j=JSON.parse(await f.text());if(!j.rifa)throw 0;D=Object.assign(vacio(),j);guardar();render();estado("Datos cargados 🎀")}
+  catch(_){alert("Ese archivo no parece ser un datos.json de esta página.")}
+  e.target.value="";
+};
+$("btnBorrar").onclick=()=>{if(confirm("¿Seguro que querés borrar todos los datos de este navegador?")){D=vacio();guardar();render();estado("Todo borrado")}};
+$("btnExcel").onclick=()=>{
+  if(typeof XLSX==="undefined"){alert("No se pudo cargar el exportador. Revisá tu conexión.");return}
+  const t=totales(),wb=XLSX.utils.book_new();
+  const res=[["Concepto","Monto"],["Rifa del peso",t.rifa],["Remeras (recaudo)",t.rem],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
+    ...CATS.map(c=>["Gasto: "+c,t.porCat[c]]),["TOTAL GASTOS",t.gas],[],["SALDO",t.sal]];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),"Resumen");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Detalle","Monto recaudado"],...D.rifa.map(r=>[r.fecha,r.detalle||"",num(r.monto)])]),"Rifa del Peso");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Detalle","Cantidad","Recaudo"],...D.remeras.map(r=>[r.fecha,r.detalle||"",num(r.cantidad),num(r.recaudo)])]),"Remeras");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Categoría","Detalle","Monto"],...D.gastos.map(r=>[r.fecha,r.categoria,r.detalle||"",num(r.monto)])]),"Gastos");
+  XLSX.writeFile(wb,"Finanzas_Proyecto.xlsx");estado("Excel descargado ⬇");
+};
+// tema claro/oscuro
+(function(){let t=null;try{t=localStorage.getItem("tema")}catch(e){}
+  if(t)document.documentElement.dataset.theme=t;
+  const oscuro=()=>document.documentElement.dataset.theme?document.documentElement.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  const pintar=()=>$("btnTema").textContent=oscuro()?"☀️":"🌙";pintar();
+  $("btnTema").onclick=()=>{const n=oscuro()?"light":"dark";document.documentElement.dataset.theme=n;try{localStorage.setItem("tema",n)}catch(e){}pintar()};
+})();
+iniciar();
+</script>
+</body>
+</html>
