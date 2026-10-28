@@ -254,7 +254,7 @@ const fmt=n=>(n<0?"-":"")+"$"+Math.abs(Math.round(n)).toLocaleString("es-AR");
 const num=v=>{const x=parseFloat(String(v??"").replace(/\./g,"").replace(",","."));return isFinite(x)?x:0};
 const hoy=()=>new Date().toISOString().slice(0,10);
 // ⬇⬇ Pegá acá entre las comillas el link de la "Aplicación web" de Google Apps Script ⬇⬇
-const URL_SHEETS="";
+const URL_SHEETS="https://script.google.com/macros/s/AKfycbxjQJTFMO8x-9WLP8DWb47jLKLWdp7Cg8_fHsCSEMAJBtXC0OGPRotHBkjFL3Nk5X_d5Q/exec";
 const MSG=URL_SHEETS?"Datos compartidos: todos los que entran ven lo mismo ✨":"Los cambios se guardan solos en este navegador ✨";
 function estado(t,fijo){$("estado").textContent=t;clearTimeout(estado.t);if(!fijo)estado.t=setTimeout(()=>$("estado").textContent=MSG,2500)}
 
@@ -291,7 +291,11 @@ async function iniciar(){
   if(URL_SHEETS){
     if(local&&local.rifa){D=local;render()}
     estado("Cargando datos compartidos…",true);
-    try{D=Object.assign(vacio(),await traer());try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}estado(MSG,true)}
+    try{const remoto=Object.assign(vacio(),await traer());
+      const tiene=x=>x&&((x.rifa||[]).length||(x.remeras||[]).length||(x.gastos||[]).length);
+      // si la planilla está vacía pero este navegador ya tenía datos, los sube
+      if(!tiene(remoto)&&tiene(local)){D=Object.assign(vacio(),local);render();guardar()}
+      else{D=remoto;try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}estado(MSG,true)}}
     catch(e){estado("⚠ No se pudieron traer los datos compartidos. Mostrando la última copia de este navegador.",true)}
     setInterval(refrescar,30000);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refrescar()});
