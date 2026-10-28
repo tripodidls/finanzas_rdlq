@@ -6,8 +6,8 @@
 var HOJAS = {
   rifa:    { nombre: 'Rifa del Peso', columnas: ['fecha', 'componente', 'detalle', 'monto', 'pagado', 'autora'],
              encabezados: ['Fecha', 'Componente', 'Detalle', 'Monto recaudado', 'Pagado', 'Anotó'] },
-  remeras: { nombre: 'Remeras', columnas: ['fecha', 'componente', 'detalle', 'cantidad', 'recaudo', 'autora'],
-             encabezados: ['Fecha', 'Componente', 'Detalle', 'Cantidad (unidades)', 'Recaudo', 'Anotó'] },
+  remeras: { nombre: 'Remeras', columnas: ['fecha', 'componente', 'detalle', 'cantidad', 'recaudo', 'pagado', 'autora'],
+             encabezados: ['Fecha', 'Componente', 'Detalle', 'Cantidad (unidades)', 'Recaudo', 'Pagado', 'Anotó'] },
   gastos:  { nombre: 'Gastos', columnas: ['fecha', 'categoria', 'detalle', 'monto', 'autora'],
              encabezados: ['Fecha', 'Categoría', 'Detalle', 'Monto', 'Anotó'] }
 };
@@ -83,7 +83,7 @@ function asegurarResumen_() {
   var filas = [
     ['INGRESOS', ''],
     ['Rifa del peso (solo pagado)', "=SUMIF('Rifa del Peso'!E2:E,TRUE,'Rifa del Peso'!D2:D)"],
-    ['Remeras (recaudo)', '=SUM(Remeras!E2:E)'],
+    ['Remeras (solo pagado)', '=SUMIF(Remeras!F2:F,TRUE,Remeras!E2:E)'],
     ['Remeras vendidas (unidades)', '=SUM(Remeras!D2:D)'],
     ['TOTAL INGRESOS', '=B2+B3'],
     ['', ''],

@@ -125,8 +125,9 @@ tfoot td{font-weight:800;background:var(--amarillo)!important;color:#1c1a20;padd
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .chip{background:var(--crema);border:2px solid var(--linea);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px}
 
-.con-foto{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:24px;align-items:start}
-.con-foto .foto{width:100%;border-radius:18px;border:3px solid var(--tinta);transform:rotate(2deg);box-shadow:5px 5px 0 var(--tinta);background:var(--rosa)}
+section.remeras{position:relative}
+section.remeras .titulo-sec,section.remeras .sub{padding-right:190px}
+.foto-remes{position:absolute;right:26px;top:-22px;width:160px;border-radius:16px;border:3px solid var(--tinta);transform:rotate(5deg);box-shadow:5px 5px 0 var(--tinta);background:var(--rosa);z-index:1}
 
 .frase{margin:8px auto 40px;max-width:420px;padding:0 10px}
 .frase img{display:block;width:100%;border:4px solid var(--tinta);border-radius:14px;box-shadow:8px 8px 0 var(--rosa);
@@ -162,8 +163,9 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
   .botones-hero{gap:8px}
   .botones-hero a{flex:1;justify-content:center;font-size:14px;padding:10px 8px;white-space:nowrap;gap:4px}
   .cards{grid-template-columns:1fr}
-  .con-foto{grid-template-columns:minmax(0,1fr)}
-  .con-foto .foto{max-width:260px;margin:0 auto}
+  .foto-remes{width:92px;right:10px;top:-16px}
+  section.remeras .titulo-sec,section.remeras .sub{padding-right:0}
+  section.remeras .titulo-sec{padding-right:96px}
   section.bloque{padding:18px}
 }
 </style>
@@ -238,20 +240,17 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 </section>
 
 <section class="bloque remeras" id="remeras">
+  <img class="foto-remes" src="img/remeras.webp" alt="Remeras negra y blanca de La Reina de la Queja MJ 2026">
   <div class="titulo-sec"><h2><span class="serif">las</span>Remes de la reina</h2></div>
   <p class="sub">Una fila por venta. Si son 3 talles M de un mismo color, podés ponerlas juntas. El recaudo se calcula con cada unidad a $490.</p>
-  <div class="con-foto">
-    <div>
+  <p class="sub">Solo lo que esté tildado como <b>Pagado</b> se suma a los ingresos y al saldo.</p>
       <div class="tabla-wrap"><table>
-        <thead><tr><th style="width:150px">Fecha</th><th style="width:140px">Componente</th><th>Detalle</th><th style="width:100px">Unidades</th><th style="width:130px">Recaudo</th><th></th></tr></thead>
+        <thead><tr><th style="width:150px">Fecha</th><th style="width:140px">Componente</th><th>Detalle</th><th style="width:100px">Unidades</th><th style="width:120px">Recaudo</th><th style="width:80px">Pagado</th><th></th></tr></thead>
         <tbody id="tbRemeras"></tbody>
-        <tfoot><tr><td colspan="3">Totales</td><td id="ftUnid">0</td><td id="ftRem">$0</td><td></td></tr></tfoot>
+        <tfoot><tr><td colspan="3">Totales</td><td id="ftUnid">0</td><td id="ftRem">$0</td><td></td><td></td></tr></tfoot>
       </table></div>
       <button class="agregar" data-add="remeras">+ Agregar venta</button>
-      <div class="chips"><span class="chip" id="chipProm">Precio promedio: $0</span></div>
-    </div>
-    <img class="foto" src="img/remeras.webp" alt="Remeras negra y blanca de La Reina de la Queja MJ 2026">
-  </div>
+      <div class="chips"><span class="chip" id="chipRemPag">✔ Pagado: $0</span><span class="chip pend" id="chipRemPend">⏳ Pendiente: $0</span><span class="chip" id="chipProm">Precio por remera: $490</span></div>
 </section>
 
 <div class="frase"><img src="img/barco.webp" alt="Si te cansas paramos juntas y se hace fuerte un barco de papel"></div>
@@ -352,7 +351,7 @@ async function iniciar(){
 
 const COLS={
   rifa:[["fecha","date"],["componente","comp"],["detalle","text","Ej: transferencia / efectivo / pendiente"],["monto","money"],["pagado","check"]],
-  remeras:[["fecha","date"],["componente","comp"],["detalle","text","Ej: 3 talle M negras"],["cantidad","int"],["recaudo","calc"]],
+  remeras:[["fecha","date"],["componente","comp"],["detalle","text","Ej: 3 talle M negras"],["cantidad","int"],["recaudo","calc"],["pagado","check"]],
   gastos:[["fecha","date"],["categoria","cat"],["detalle","text","Ej: bases y pinceles"],["monto","money"]],
 };
 const TB={rifa:"tbRifa",remeras:"tbRemeras",gastos:"tbGastos"};
@@ -406,9 +405,11 @@ function totales(){
   const porCat=Object.fromEntries(CATS.map(c=>[c,0]));
   D.gastos.forEach(g=>{if(porCat[g.categoria]!==undefined)porCat[g.categoria]+=num(g.monto)});
   const gas=Object.values(porCat).reduce((a,b)=>a+b,0);
-  // lo pendiente de la rifa no cuenta hasta que se marque como pagado
-  const ing=pagado+rem,sal=ing-gas;
-  $("notaIng").textContent=rifa-pagado>0?"sin contar "+fmt(rifa-pagado)+" pendientes de la rifa":"";
+  // lo pendiente (rifa y remeras) no cuenta hasta que se marque como pagado
+  const remPag=D.remeras.reduce((s,r)=>s+(r.pagado===true?num(r.cantidad)*PRECIO_REMERA:0),0);
+  $("chipRemPag").textContent="✔ Pagado: "+fmt(remPag);$("chipRemPend").textContent="⏳ Pendiente: "+fmt(rem-remPag);
+  const ing=pagado+remPag,sal=ing-gas,pend=(rifa-pagado)+(rem-remPag);
+  $("notaIng").textContent=pend>0?"sin contar "+fmt(pend)+" pendientes":"";
   $("ftRifa").textContent=fmt(rifa);$("ftUnid").textContent=unid;$("ftRem").textContent=fmt(rem);$("ftGas").textContent=fmt(gas);
   $("chipProm").textContent="Precio por remera: "+fmt(PRECIO_REMERA);
   $("totIng").textContent=fmt(ing);$("totGas").textContent=fmt(gas);
@@ -416,7 +417,7 @@ function totales(){
   const max=Math.max(...Object.values(porCat),1);
   $("barras").innerHTML=CATS.map(c=>`<div class="barra"><div class="fila"><span>${ICON[c]} ${c}</span><span>${fmt(porCat[c])}</span></div>
     <div class="pista"><div class="relleno" style="width:${porCat[c]/max*100}%"></div></div></div>`).join("");
-  return {rifa,pagado,unid,rem,porCat,gas,ing,sal};
+  return {rifa,pagado,unid,rem,remPag,porCat,gas,ing,sal};
 }
 function render(){Object.keys(TB).forEach(renderTabla);totales()}
 
@@ -444,11 +445,11 @@ $("archivo").onchange=async e=>{
 $("btnExcel").onclick=()=>{
   if(typeof XLSX==="undefined"){alert("No se pudo cargar el exportador. Revisá tu conexión.");return}
   const t=totales(),wb=XLSX.utils.book_new();
-  const res=[["Concepto","Monto"],["Rifa del peso (pagado)",t.pagado],["Rifa del peso (pendiente, no suma)",t.rifa-t.pagado],["Remeras (recaudo)",t.rem],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
+  const res=[["Concepto","Monto"],["Rifa del peso (pagado)",t.pagado],["Rifa del peso (pendiente, no suma)",t.rifa-t.pagado],["Remeras (pagado)",t.remPag],["Remeras (pendiente, no suma)",t.rem-t.remPag],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
     ...CATS.map(c=>["Gasto: "+c,t.porCat[c]]),["TOTAL GASTOS",t.gas],[],["SALDO",t.sal]];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),"Resumen");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Monto recaudado","Pagado","Anotó"],...D.rifa.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.monto),r.pagado?"Sí":"No",r.autora||""])]),"Rifa del Peso");
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Cantidad","Recaudo","Anotó"],...D.remeras.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.cantidad),num(r.cantidad)*PRECIO_REMERA,r.autora||""])]),"Remeras");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Cantidad","Recaudo","Pagado","Anotó"],...D.remeras.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.cantidad),num(r.cantidad)*PRECIO_REMERA,r.pagado?"Sí":"No",r.autora||""])]),"Remeras");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Categoría","Detalle","Monto","Anotó"],...D.gastos.map(r=>[r.fecha,r.categoria,r.detalle||"",num(r.monto),r.autora||""])]),"Gastos");
   XLSX.writeFile(wb,"Finanzas_Proyecto.xlsx");estado("Excel descargado ⬇");
 };
