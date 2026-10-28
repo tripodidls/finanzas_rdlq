@@ -36,16 +36,6 @@ body{margin:0;font-family:"Poppins",system-ui,sans-serif;color:var(--texto);back
 h1,h2,h3{font-family:"Poppins",sans-serif;font-weight:900;letter-spacing:-.04em;line-height:.95}
 .serif{font-family:"Playfair Display",serif;font-weight:500;letter-spacing:-.01em}
 
-/* ---------- barra superior ---------- */
-.topbar{position:sticky;top:0;z-index:20;background:var(--rosa);border-bottom:3px solid var(--tinta)}
-.topbar .in{max-width:1080px;margin:0 auto;padding:8px 16px;display:flex;align-items:center;gap:12px}
-.marca{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--tinta);font-weight:900;letter-spacing:-.04em;font-size:18px;white-space:nowrap}
-.marca img{width:40px;height:40px;object-fit:contain}
-.nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
-.nav a{font-weight:800;font-size:14px;text-decoration:none;color:var(--tinta);background:#fff8ec;border:2px solid var(--tinta);
-  padding:6px 14px;border-radius:999px;transition:transform .12s, background .12s}
-.nav a:hover,.nav a.activo{background:var(--amarillo);transform:translateY(-2px)}
-
 /* ---------- portada ---------- */
 .hero{position:relative;display:flex;align-items:center;overflow:hidden;border-bottom:3px solid var(--tinta);
   background:radial-gradient(circle at 80% 40%,rgba(253,102,195,.35),transparent 55%),#1c1a20}
@@ -97,7 +87,7 @@ button.peligro{border-color:var(--rojo);color:var(--rojo)}
 .ayuda{background:var(--crema);border:2px dashed var(--rosa);border-radius:18px;padding:12px 16px;font-size:14px;margin:0 0 26px}
 .ayuda b{color:var(--fucsia)}
 
-section.bloque{scroll-margin-top:80px;background:var(--papel);border:3px solid var(--linea);border-radius:28px;padding:24px;margin-bottom:28px;box-shadow:8px 8px 0 var(--rosa)}
+section.bloque{scroll-margin-top:20px;background:var(--papel);border:3px solid var(--linea);border-radius:28px;padding:24px;margin-bottom:28px;box-shadow:8px 8px 0 var(--rosa)}
 .titulo-sec{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:4px}
 section.bloque h2{margin:0;font-size:clamp(34px,5.5vw,52px);color:var(--rosa)}
 section.bloque h2 .serif{color:var(--texto);font-size:.62em;font-style:italic;display:block;letter-spacing:0;margin-bottom:2px}
@@ -132,14 +122,19 @@ tfoot td{font-weight:800;background:var(--amarillo)!important;color:#1c1a20;padd
 .barra .relleno{height:100%;background:repeating-linear-gradient(-45deg,var(--rosa) 0 10px,var(--fucsia) 10px 20px);transition:width .3s}
 footer{text-align:center;color:var(--texto-suave);font-size:14px;margin-top:30px}
 footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
-#archivo{display:none}
+.frutillita{position:fixed;z-index:50;pointer-events:none;font-size:22px;line-height:1;user-select:none;
+  animation:salta .9s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes salta{
+  0%{transform:translate(-50%,-50%) scale(.3) rotate(0);opacity:1}
+  70%{opacity:1}
+  100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--rot));opacity:0}}
+@media (prefers-reduced-motion:reduce){.frutillita{animation:aparece .7s forwards}
+  @keyframes aparece{0%{transform:translate(-50%,-50%);opacity:1}100%{transform:translate(-50%,-50%);opacity:0}}}
 @media (max-width:760px){
   .hero .in{flex-direction:column;padding:28px 16px 44px;text-align:left}
   .poster{width:min(240px,62vw);align-self:center;margin:10px 40px 20px 0}
   .botones-hero{gap:8px}
   .botones-hero a{flex:1;justify-content:center;font-size:14px;padding:10px 8px;white-space:nowrap;gap:4px}
-  .marca span{display:none}
-  .nav a{padding:5px 11px;font-size:13px}
   .cards{grid-template-columns:1fr}
   .con-foto{grid-template-columns:minmax(0,1fr)}
   .con-foto .foto{max-width:260px;margin:0 auto}
@@ -149,13 +144,6 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 </style>
 </head>
 <body>
-
-<div class="topbar"><div class="in">
-  <a class="marca" href="#inicio"><img src="img/frutilla.webp" alt=""><span>La Reina de la Queja</span></a>
-  <nav class="nav" aria-label="Secciones">
-    <a href="#rifa">🍓 Rifa</a><a href="#remeras">👚 Remeras</a><a href="#gastos">💸 Gastos</a>
-  </nav>
-</div></div>
 
 <header class="hero" id="inicio">
   <span class="estrella" style="left:6%;top:12%">★</span>
@@ -183,10 +171,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 <div class="toolbar">
   <button class="primario" id="btnExcel">⬇ Descargar Excel</button>
   <button id="btnGuardar">💾 Guardar copia de datos</button>
-  <button id="btnCargar">📂 Cargar datos</button>
-  <button class="peligro" id="btnBorrar">Borrar todo</button>
   <button id="btnTema" title="Cambiar modo claro / oscuro">🌙</button>
-  <input type="file" id="archivo" accept="application/json,.json">
 </div>
 <div class="estado" id="estado">Los cambios se guardan solos en este navegador ✨</div>
 
@@ -332,14 +317,6 @@ $("btnGuardar").onclick=()=>{
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="datos.json";a.click();
   estado("Se descargó datos.json 💾");
 };
-$("btnCargar").onclick=()=>$("archivo").click();
-$("archivo").onchange=async e=>{
-  const f=e.target.files[0];if(!f)return;
-  try{const j=JSON.parse(await f.text());if(!j.rifa)throw 0;D=Object.assign(vacio(),j);guardar();render();estado("Datos cargados 🎀")}
-  catch(_){alert("Ese archivo no parece ser un datos.json de esta página.")}
-  e.target.value="";
-};
-$("btnBorrar").onclick=()=>{if(confirm("¿Seguro que querés borrar todos los datos de este navegador?")){D=vacio();guardar();render();estado("Todo borrado")}};
 $("btnExcel").onclick=()=>{
   if(typeof XLSX==="undefined"){alert("No se pudo cargar el exportador. Revisá tu conexión.");return}
   const t=totales(),wb=XLSX.utils.book_new();
@@ -358,11 +335,20 @@ $("btnExcel").onclick=()=>{
   const pintar=()=>$("btnTema").textContent=oscuro()?"☀️":"🌙";pintar();
   $("btnTema").onclick=()=>{const n=oscuro()?"light":"dark";document.documentElement.dataset.theme=n;try{localStorage.setItem("tema",n)}catch(e){}pintar()};
 })();
-// marca en la barra la sección que se está viendo
-(function(){const links=[...document.querySelectorAll(".nav a")];
-  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(a=>a.classList.toggle("activo",a.getAttribute("href")==="#"+e.target.id))}),{rootMargin:"-40% 0px -55% 0px"});
-  ["rifa","remeras","gastos"].forEach(id=>obs.observe(document.getElementById(id)));
-})();
+// frutillitas que saltan al hacer click en un espacio vacío
+document.addEventListener("click",e=>{
+  if(e.target.closest("a,button,input,select,textarea,label,[contenteditable],table"))return;
+  const n=7;
+  for(let i=0;i<n;i++){
+    const f=document.createElement("span");f.className="frutillita";f.textContent="🍓";f.setAttribute("aria-hidden","true");
+    const ang=(Math.PI*2*i/n)+Math.random()*.6,dist=50+Math.random()*50;
+    f.style.left=e.clientX+"px";f.style.top=e.clientY+"px";
+    f.style.fontSize=(16+Math.random()*14)+"px";
+    f.style.setProperty("--dx",Math.cos(ang)*dist+"px");f.style.setProperty("--dy",Math.sin(ang)*dist-20+"px");
+    f.style.setProperty("--rot",(Math.random()*120-60)+"deg");
+    document.body.appendChild(f);f.addEventListener("animationend",()=>f.remove());
+  }
+});
 iniciar();
 </script>
 </body>
