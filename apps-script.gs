@@ -82,7 +82,7 @@ function asegurarResumen_() {
   var cats = ['Maquillaje', 'Luces', 'Escenografía', 'Utilería', 'Vestuario', 'Audio', 'Comida', 'Extra'];
   var filas = [
     ['INGRESOS', ''],
-    ['Rifa del peso', "=SUM('Rifa del Peso'!D2:D)"],
+    ['Rifa del peso (solo pagado)', "=SUMIF('Rifa del Peso'!E2:E,TRUE,'Rifa del Peso'!D2:D)"],
     ['Remeras (recaudo)', '=SUM(Remeras!E2:E)'],
     ['Remeras vendidas (unidades)', '=SUM(Remeras!D2:D)'],
     ['TOTAL INGRESOS', '=B2+B3'],

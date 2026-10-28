@@ -7,7 +7,7 @@
 <link rel="icon" href="img/frutilla.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;0,800;0,900;1,800&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;0,800;0,900;1,800&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Caveat:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{
   --rosa:#fd66c3; --fucsia:#ff2fa8; --rosa-claro:#ffe1f2; --rosa-suave:#fff2f9;
@@ -145,6 +145,9 @@ tfoot td{font-weight:800;background:var(--amarillo)!important;color:#1c1a20;padd
 .barra .relleno{height:100%;background:repeating-linear-gradient(-45deg,var(--rosa) 0 10px,var(--fucsia) 10px 20px);transition:width .3s}
 footer{text-align:center;color:var(--texto-suave);font-size:14px;margin-top:30px}
 footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
+.firma{display:block;font-family:"Caveat",cursive;font-size:46px;color:var(--fucsia);margin-top:14px;transform:rotate(-4deg);line-height:1}
+.firma::after{content:"";display:block;width:90px;height:3px;margin:2px auto 0;background:var(--fucsia);border-radius:3px;transform:rotate(-2deg)}
+.card .nota{font-size:12px;font-weight:600;margin-top:2px;opacity:.8}
 .frutillita{position:fixed;z-index:50;pointer-events:none;font-size:22px;line-height:1;user-select:none;
   animation:salta .9s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes salta{
@@ -213,7 +216,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 <div class="estado" id="estado" role="status"></div>
 
 <div class="cards">
-  <div class="card ing"><span class="ico">🍓</span><div class="lab">ingresos</div><div class="num" id="totIng">$0</div></div>
+  <div class="card ing"><span class="ico">🍓</span><div class="lab">ingresos</div><div class="num" id="totIng">$0</div><div class="nota" id="notaIng"></div></div>
   <div class="card gas"><span class="ico">💸</span><div class="lab">gastos</div><div class="num" id="totGas">$0</div></div>
   <div class="card sal"><span class="ico">👑</span><div class="lab">saldo</div><div class="num" id="totSal">$0</div></div>
 </div>
@@ -224,6 +227,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 <section class="bloque rifa" id="rifa">
   <div class="titulo-sec"><h2><span class="serif">la</span>Rifa del peso</h2></div>
   <p class="sub">Reina, detallá si transferís, pagás en efectivo o continúa pendiente.</p>
+  <p class="sub">Solo lo que esté tildado como <b>Pagado</b> se suma a los ingresos y al saldo.</p>
   <div class="tabla-wrap"><table>
     <thead><tr><th style="width:150px">Fecha</th><th style="width:150px">Componente</th><th>Detalle</th><th style="width:160px">Monto recaudado</th><th style="width:80px">Pagado</th><th></th></tr></thead>
     <tbody id="tbRifa"></tbody>
@@ -266,7 +270,7 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
   <div class="barras" id="barras"></div>
 </section>
 
-<footer><img src="img/frutilla.webp" alt="">hecho con 💖 para La Reina de la Queja · los datos se comparten con todo el grupo</footer>
+<footer><img src="img/frutilla.webp" alt="">hecho con 💖 para La Reina de la Queja · los datos se comparten con todo el grupo<span class="firma">Luci</span></footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -402,7 +406,9 @@ function totales(){
   const porCat=Object.fromEntries(CATS.map(c=>[c,0]));
   D.gastos.forEach(g=>{if(porCat[g.categoria]!==undefined)porCat[g.categoria]+=num(g.monto)});
   const gas=Object.values(porCat).reduce((a,b)=>a+b,0);
-  const ing=rifa+rem,sal=ing-gas;
+  // lo pendiente de la rifa no cuenta hasta que se marque como pagado
+  const ing=pagado+rem,sal=ing-gas;
+  $("notaIng").textContent=rifa-pagado>0?"sin contar "+fmt(rifa-pagado)+" pendientes de la rifa":"";
   $("ftRifa").textContent=fmt(rifa);$("ftUnid").textContent=unid;$("ftRem").textContent=fmt(rem);$("ftGas").textContent=fmt(gas);
   $("chipProm").textContent="Precio por remera: "+fmt(PRECIO_REMERA);
   $("totIng").textContent=fmt(ing);$("totGas").textContent=fmt(gas);
@@ -410,7 +416,7 @@ function totales(){
   const max=Math.max(...Object.values(porCat),1);
   $("barras").innerHTML=CATS.map(c=>`<div class="barra"><div class="fila"><span>${ICON[c]} ${c}</span><span>${fmt(porCat[c])}</span></div>
     <div class="pista"><div class="relleno" style="width:${porCat[c]/max*100}%"></div></div></div>`).join("");
-  return {rifa,unid,rem,porCat,gas,ing,sal};
+  return {rifa,pagado,unid,rem,porCat,gas,ing,sal};
 }
 function render(){Object.keys(TB).forEach(renderTabla);totales()}
 
@@ -438,7 +444,7 @@ $("archivo").onchange=async e=>{
 $("btnExcel").onclick=()=>{
   if(typeof XLSX==="undefined"){alert("No se pudo cargar el exportador. Revisá tu conexión.");return}
   const t=totales(),wb=XLSX.utils.book_new();
-  const res=[["Concepto","Monto"],["Rifa del peso",t.rifa],["Remeras (recaudo)",t.rem],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
+  const res=[["Concepto","Monto"],["Rifa del peso (pagado)",t.pagado],["Rifa del peso (pendiente, no suma)",t.rifa-t.pagado],["Remeras (recaudo)",t.rem],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
     ...CATS.map(c=>["Gasto: "+c,t.porCat[c]]),["TOTAL GASTOS",t.gas],[],["SALDO",t.sal]];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),"Resumen");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Monto recaudado","Pagado","Anotó"],...D.rifa.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.monto),r.pagado?"Sí":"No",r.autora||""])]),"Rifa del Peso");
