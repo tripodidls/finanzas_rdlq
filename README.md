@@ -1,6 +1,6 @@
 # Finanzas del Proyecto 🍓🎀
 
-Página de finanzas de **La Reina de la Queja** (MJ 2026) para anotar y actualizar las finanzas del proyecto: rifa del peso, venta de remeras y gastos (maquillaje, luces, escenografía, utilería, vestuario y audio).
+Página de finanzas de **La Reina de la Queja** (MJ 2026) para anotar y actualizar las finanzas del proyecto: rifa del peso, venta de remeras y gastos (maquillaje, luces, escenografía, utilería, vestuario, audio, comida, compras y extras).
 
 - `index.html`: la página web. Arriba tiene botones para ir directo a Rifas, Remeras y Gastos.
 - `img/`: imágenes del proyecto (afiche, frutilla, remeras, barco de papel). Los datos se guardan en el navegador de quien la usa.

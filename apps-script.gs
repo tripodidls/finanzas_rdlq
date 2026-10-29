@@ -79,7 +79,7 @@ function hoja_(k) {
 function asegurarResumen_() {
   var ss = SpreadsheetApp.getActive();
   var r = ss.getSheetByName('Resumen') || ss.insertSheet('Resumen', 0);
-  var cats = ['Maquillaje', 'Luces', 'Escenografía', 'Utilería', 'Vestuario', 'Audio', 'Comida', 'Extra'];
+  var cats = ['Maquillaje', 'Luces', 'Escenografía', 'Utilería', 'Vestuario', 'Audio', 'Comida', 'Compras', 'Extra'];
   var filas = [
     ['INGRESOS', ''],
     ['Rifa del peso (solo pagado)', "=SUMIF('Rifa del Peso'!E2:E,TRUE,'Rifa del Peso'!D2:D)"],

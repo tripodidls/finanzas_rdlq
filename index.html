@@ -274,10 +274,12 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-const CATS=["Maquillaje","Luces","Escenografía","Utilería","Vestuario","Audio","Comida","Extra"];
+const CATS=["Maquillaje","Luces","Escenografía","Utilería","Vestuario","Audio","Comida","Compras","Extra"];
 const PRECIO_REMERA=490;
 const COMPONENTES=["Agus C.","Agus M.","Boli","Cami","Flopa","Katy","Luci","Mai","María","Marti","Paz","Vicky"];
-const ICON={Maquillaje:"💄",Luces:"💡",Escenografía:"🎭",Utilería:"🪄",Vestuario:"👗",Audio:"🎤",Comida:"🍕",Extra:"🛍️"};
+const ICON={Maquillaje:"💄",Luces:"💡",Escenografía:"🎭",Utilería:"🪄",Vestuario:"👗",Audio:"🎤",Comida:"🍕",Compras:"🛒",Extra:"🛍️"};
+// ejemplo del renglón de detalle según la categoría (si no está, usa el de COLS)
+const PH_CAT={Compras:"Como remeras o pegotines"};
 const COLOR={"Agus C.":"#ff3ea5","Agus M.":"#9b5cff","Boli":"#ff8a3d","Cami":"#22b573","Flopa":"#f2c200","Katy":"#e23744",
   "Luci":"#3d5afe","Mai":"#00a6a0","María":"#b0127a","Marti":"#8d5a3c","Paz":"#7cb342","Vicky":"#d16ae8"};
 let REINA="";try{REINA=localStorage.getItem("reina")||""}catch(e){}
@@ -377,10 +379,11 @@ function renderTabla(k){
     COLS[k].forEach(([campo,tipo,ph])=>{
       const td=document.createElement("td");if(tipo==="check")td.className="chk";
       if(tipo==="calc"){const sp=document.createElement("span");sp.className="calc";sp.textContent=fmt(num(row[campo]));td.appendChild(sp);tr.appendChild(td);return}
-      const el=celda(tipo,row[campo],ph);
+      const el=celda(tipo,row[campo],k==="gastos"&&campo==="detalle"?PH_CAT[row.categoria]||ph:ph);
       el.setAttribute("aria-label",campo);
       const cambio=()=>{const v=tipo==="check"?el.checked:el.value;if(v===row[campo])return;row[campo]=v;
         if(REINA){row.autora=REINA;pintarFila(tr,row)}
+        if(k==="gastos"&&campo==="categoria"){const det=tr.querySelector("input[type=text]");if(det)det.placeholder=PH_CAT[v]||COLS.gastos[2][2]}
         if(k==="remeras"){row.recaudo=String(num(row.cantidad)*PRECIO_REMERA);tr.querySelector(".calc").textContent=fmt(num(row.recaudo))}
         guardar();totales()};
       el.addEventListener("input",cambio);el.addEventListener("change",cambio);
