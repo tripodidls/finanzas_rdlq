@@ -8,6 +8,8 @@ var HOJAS = {
              encabezados: ['Fecha', 'Componente', 'Detalle', 'Monto recaudado', 'Pagado', 'Anotó'] },
   remeras: { nombre: 'Remeras', columnas: ['fecha', 'componente', 'detalle', 'cantidad', 'recaudo', 'pagado', 'autora'],
              encabezados: ['Fecha', 'Componente', 'Detalle', 'Cantidad (unidades)', 'Recaudo', 'Pagado', 'Anotó'] },
+  otros:   { nombre: 'Otros Ingresos', columnas: ['fecha', 'componente', 'detalle', 'monto', 'autora'],
+             encabezados: ['Fecha', 'Componente', 'Detalle', 'Monto', 'Anotó'] },
   gastos:  { nombre: 'Gastos', columnas: ['fecha', 'categoria', 'detalle', 'monto', 'autora'],
              encabezados: ['Fecha', 'Categoría', 'Detalle', 'Monto', 'Anotó'] }
 };
@@ -84,14 +86,15 @@ function asegurarResumen_() {
     ['INGRESOS', ''],
     ['Rifa del peso (solo pagado)', "=SUMIF('Rifa del Peso'!E2:E,TRUE,'Rifa del Peso'!D2:D)"],
     ['Remeras (solo pagado)', '=SUMIF(Remeras!F2:F,TRUE,Remeras!E2:E)'],
+    ['Otros ingresos (colaboraciones y donaciones)', "=SUM('Otros Ingresos'!D2:D)"],
     ['Remeras vendidas (unidades)', '=SUM(Remeras!D2:D)'],
-    ['TOTAL INGRESOS', '=B2+B3'],
+    ['TOTAL INGRESOS', '=B2+B3+B4'],
     ['', ''],
     ['GASTOS', '']
   ];
   cats.forEach(function (c) { filas.push([c, '=SUMIF(Gastos!B2:B,"' + c + '",Gastos!D2:D)']); });
-  var total = 8 + cats.length;
-  filas.push(['TOTAL GASTOS', '=SUM(B8:B' + (total - 1) + ')'], ['', ''], ['SALDO', '=B5-B' + total]);
+  var total = 9 + cats.length;
+  filas.push(['TOTAL GASTOS', '=SUM(B9:B' + (total - 1) + ')'], ['', ''], ['SALDO', '=B6-B' + total]);
   r.clear();
   r.getRange(1, 1, filas.length, 2).setValues(filas);
   r.getRange(1, 1, filas.length, 1).setFontWeight('bold');

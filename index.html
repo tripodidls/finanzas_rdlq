@@ -253,6 +253,18 @@ footer img{width:70px;display:block;margin:0 auto 6px;transform:rotate(-6deg)}
       <div class="chips"><span class="chip" id="chipRemPag">✔ Pagado: $0</span><span class="chip pend" id="chipRemPend">⏳ Pendiente: $0</span><span class="chip" id="chipProm">Precio por remera: $490</span></div>
 </section>
 
+<section class="bloque otros" id="otros">
+  <div class="titulo-sec"><h2>Otros ingresos</h2></div>
+  <p class="sub">Acá anotamos colaboraciones de las compañeras y/o donaciones en dinero.</p>
+  <p class="sub">Todo lo que se anote acá se suma a los ingresos y al saldo.</p>
+  <div class="tabla-wrap"><table>
+    <thead><tr><th style="width:150px">Fecha</th><th style="width:150px">Componente</th><th>Detalle</th><th style="width:160px">Monto</th><th></th></tr></thead>
+    <tbody id="tbOtros"></tbody>
+    <tfoot><tr><td colspan="3">Total otros ingresos</td><td id="ftOtros">$0</td><td></td></tr></tfoot>
+  </table></div>
+  <button class="agregar" data-add="otros">+ Agregar ingreso</button>
+</section>
+
 <div class="frase"><img src="img/barco.webp" alt="Si te cansas paramos juntas y se hace fuerte un barco de papel"></div>
 
 <section class="bloque gastos" id="gastos">
@@ -284,7 +296,8 @@ const COLOR={"Agus C.":"#ff3ea5","Agus M.":"#9b5cff","Boli":"#ff8a3d","Cami":"#2
   "Luci":"#3d5afe","Mai":"#00a6a0","María":"#b0127a","Marti":"#8d5a3c","Paz":"#7cb342","Vicky":"#d16ae8"};
 let REINA="";try{REINA=localStorage.getItem("reina")||""}catch(e){}
 const KEY="finanzas-proyecto-v1";
-const vacio=()=>({rifa:[],remeras:[],gastos:[]});
+const vacio=()=>({rifa:[],remeras:[],otros:[],gastos:[]});
+const comparable=d=>JSON.stringify({rifa:d.rifa,remeras:d.remeras,otros:d.otros,gastos:d.gastos});
 let D=vacio();
 
 const $=id=>document.getElementById(id);
@@ -306,7 +319,7 @@ function guardar(){
 async function enviar(){
   pendiente=null;enviando=true;
   try{
-    const cuerpo=JSON.stringify({rifa:D.rifa,remeras:D.remeras,gastos:D.gastos});
+    const cuerpo=comparable(D);
     const r=await fetch(URL_SHEETS,{method:"POST",body:cuerpo});
     if(!r.ok)throw 0;ultimo=cuerpo;estado("Guardado ✓ ya lo pueden ver todas");
   }catch(e){estado("⚠ No se pudo guardar en internet. Revisá la conexión; se reintenta al próximo cambio.",true)}
@@ -323,14 +336,18 @@ function normalizar(d){
 }
 async function traer(){
   const r=await fetch(URL_SHEETS+(URL_SHEETS.includes("?")?"&":"?")+"t="+Date.now());
-  if(!r.ok)throw 0;const j=await r.json();if(!j||!j.rifa)throw 0;return normalizar(j);
+  if(!r.ok)throw 0;const j=await r.json();if(!j||!j.rifa)throw 0;
+  const n=normalizar(j);
+  // si la planilla todavía no tiene la pestaña "Otros Ingresos", no se pierde lo anotado en este navegador
+  if(!("otros" in j))n.otros=D.otros||[];
+  return n;
 }
 // trae los cambios de otras personas, sin interrumpir si alguien está escribiendo
 async function refrescar(){
   if(!URL_SHEETS||pendiente||enviando)return;
   const a=document.activeElement;if(a&&/INPUT|SELECT/.test(a.tagName))return;
-  try{const j=await traer();const nuevo=JSON.stringify({rifa:j.rifa,remeras:j.remeras,gastos:j.gastos});
-    if(nuevo!==JSON.stringify({rifa:D.rifa,remeras:D.remeras,gastos:D.gastos})){D=j;ultimo=nuevo;
+  try{const j=await traer();const nuevo=comparable(j);
+    if(nuevo!==comparable(D)){D=j;ultimo=nuevo;
       try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}render();estado("Se actualizaron los datos 🔄")}}catch(e){}
 }
 async function iniciar(){
@@ -339,7 +356,7 @@ async function iniciar(){
     if(local&&local.rifa){local=normalizar(local);D=local;render()}
     estado("Cargando datos compartidos…",true);
     try{const remoto=await traer();
-      const tiene=x=>x&&((x.rifa||[]).length||(x.remeras||[]).length||(x.gastos||[]).length);
+      const tiene=x=>x&&((x.rifa||[]).length||(x.remeras||[]).length||(x.otros||[]).length||(x.gastos||[]).length);
       // si la planilla está vacía pero este navegador ya tenía datos, los sube
       if(!tiene(remoto)&&tiene(local)){D=local;render();guardar()}
       else{D=remoto;try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}estado(MSG,true)}}
@@ -354,9 +371,10 @@ async function iniciar(){
 const COLS={
   rifa:[["fecha","date"],["componente","comp"],["detalle","text","Ej: transferencia / efectivo / pendiente"],["monto","money"],["pagado","check"]],
   remeras:[["fecha","date"],["componente","comp"],["detalle","text","Ej: 3 talle M negras"],["cantidad","int"],["recaudo","calc"],["pagado","check"]],
+  otros:[["fecha","date"],["componente","comp"],["detalle","text","Ej: colaboración de una compañera / donación"],["monto","money"]],
   gastos:[["fecha","date"],["categoria","cat"],["detalle","text","Ej: bases y pinceles"],["monto","money"]],
 };
-const TB={rifa:"tbRifa",remeras:"tbRemeras",gastos:"tbGastos"};
+const TB={rifa:"tbRifa",remeras:"tbRemeras",otros:"tbOtros",gastos:"tbGastos"};
 
 function celda(tipo,valor,ph){
   if(tipo==="cat"){const s=document.createElement("select");
@@ -411,16 +429,17 @@ function totales(){
   // lo pendiente (rifa y remeras) no cuenta hasta que se marque como pagado
   const remPag=D.remeras.reduce((s,r)=>s+(r.pagado===true?num(r.cantidad)*PRECIO_REMERA:0),0);
   $("chipRemPag").textContent="✔ Pagado: "+fmt(remPag);$("chipRemPend").textContent="⏳ Pendiente: "+fmt(rem-remPag);
-  const ing=pagado+remPag,sal=ing-gas,pend=(rifa-pagado)+(rem-remPag);
+  const otros=D.otros.reduce((s,r)=>s+num(r.monto),0);
+  const ing=pagado+remPag+otros,sal=ing-gas,pend=(rifa-pagado)+(rem-remPag);
   $("notaIng").textContent=pend>0?"sin contar "+fmt(pend)+" pendientes":"";
-  $("ftRifa").textContent=fmt(rifa);$("ftUnid").textContent=unid;$("ftRem").textContent=fmt(rem);$("ftGas").textContent=fmt(gas);
+  $("ftRifa").textContent=fmt(rifa);$("ftUnid").textContent=unid;$("ftRem").textContent=fmt(rem);$("ftOtros").textContent=fmt(otros);$("ftGas").textContent=fmt(gas);
   $("chipProm").textContent="Precio por remera: "+fmt(PRECIO_REMERA);
   $("totIng").textContent=fmt(ing);$("totGas").textContent=fmt(gas);
   const s=$("totSal");s.textContent=fmt(sal);s.className="num "+(sal<0?"neg":sal>0?"pos":"");
   const max=Math.max(...Object.values(porCat),1);
   $("barras").innerHTML=CATS.map(c=>`<div class="barra"><div class="fila"><span>${ICON[c]} ${c}</span><span>${fmt(porCat[c])}</span></div>
     <div class="pista"><div class="relleno" style="width:${porCat[c]/max*100}%"></div></div></div>`).join("");
-  return {rifa,pagado,unid,rem,remPag,porCat,gas,ing,sal};
+  return {rifa,pagado,unid,rem,remPag,otros,porCat,gas,ing,sal};
 }
 function render(){Object.keys(TB).forEach(renderTabla);totales()}
 
@@ -440,7 +459,7 @@ $("btnCargar").onclick=()=>$("archivo").click();
 $("archivo").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   try{const j=JSON.parse(await f.text());if(!j.rifa)throw 0;
-    if((D.rifa.length||D.remeras.length||D.gastos.length)&&!confirm("Esto reemplaza lo que tenés anotado en este navegador por los datos del archivo. ¿Seguís?")){e.target.value="";return}
+    if((D.rifa.length||D.remeras.length||D.otros.length||D.gastos.length)&&!confirm("Esto reemplaza lo que tenés anotado en este navegador por los datos del archivo. ¿Seguís?")){e.target.value="";return}
     D=normalizar(j);guardar();render();estado("Datos cargados 🎀")}
   catch(_){alert("Ese archivo no parece ser un datos.json de esta página.")}
   e.target.value="";
@@ -448,11 +467,12 @@ $("archivo").onchange=async e=>{
 $("btnExcel").onclick=()=>{
   if(typeof XLSX==="undefined"){alert("No se pudo cargar el exportador. Revisá tu conexión.");return}
   const t=totales(),wb=XLSX.utils.book_new();
-  const res=[["Concepto","Monto"],["Rifa del peso (pagado)",t.pagado],["Rifa del peso (pendiente, no suma)",t.rifa-t.pagado],["Remeras (pagado)",t.remPag],["Remeras (pendiente, no suma)",t.rem-t.remPag],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
+  const res=[["Concepto","Monto"],["Rifa del peso (pagado)",t.pagado],["Rifa del peso (pendiente, no suma)",t.rifa-t.pagado],["Remeras (pagado)",t.remPag],["Remeras (pendiente, no suma)",t.rem-t.remPag],["Otros ingresos (colaboraciones y donaciones)",t.otros],["Remeras vendidas (unidades)",t.unid],["TOTAL INGRESOS",t.ing],[],
     ...CATS.map(c=>["Gasto: "+c,t.porCat[c]]),["TOTAL GASTOS",t.gas],[],["SALDO",t.sal]];
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),"Resumen");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Monto recaudado","Pagado","Anotó"],...D.rifa.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.monto),r.pagado?"Sí":"No",r.autora||""])]),"Rifa del Peso");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Cantidad","Recaudo","Pagado","Anotó"],...D.remeras.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.cantidad),num(r.cantidad)*PRECIO_REMERA,r.pagado?"Sí":"No",r.autora||""])]),"Remeras");
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Componente","Detalle","Monto","Anotó"],...D.otros.map(r=>[r.fecha,r.componente||"",r.detalle||"",num(r.monto),r.autora||""])]),"Otros Ingresos");
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([["Fecha","Categoría","Detalle","Monto","Anotó"],...D.gastos.map(r=>[r.fecha,r.categoria,r.detalle||"",num(r.monto),r.autora||""])]),"Gastos");
   XLSX.writeFile(wb,"Finanzas_Proyecto.xlsx");estado("Excel descargado ⬇");
 };
